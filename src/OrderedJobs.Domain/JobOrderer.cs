@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace OrderedJobs.Domain
+﻿namespace OrderedJobs.Domain
 {
-    public class JobOrderer
+  public class JobOrderer
+  {
+    public static string Order(string jobs)
     {
-      public static string Order(string jobs)
-      {
-        return "";
-      }
+      var orderedJobs = "";
+      var splitJobs = jobs.Split('|');
+      foreach (var job in splitJobs)
+        orderedJobs += job[0];
+      return orderedJobs;
     }
+  }
 }

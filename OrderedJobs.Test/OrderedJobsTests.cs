@@ -15,5 +15,17 @@ namespace OrderedJobs.Test
       {
         Assert.That(JobOrderer.Order(""), Is.EqualTo(""));
       }
+
+      [Test]
+      public void SingleJobNoDependencyTest()
+      {
+        Assert.That(JobOrderer.Order("a-"), Is.EqualTo("a"));
+      }
+
+      [Test]
+      public void MultipleJobsNoDependencyTest()
+      {
+        Assert.That(JobOrderer.Order("a-|b-|c-"), Is.EqualTo("abc"));
+      }
     }
 }
