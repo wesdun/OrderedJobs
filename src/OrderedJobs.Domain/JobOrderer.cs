@@ -14,13 +14,18 @@ namespace OrderedJobs.Domain
       var jobsToAdd = GetJobsToAdd(splitJobs, orderedJobs);
       while (jobsToAdd.Any())
       {
-        orderedJobs = jobsToAdd
-          .Where(jobToAdd => orderedJobs.Contains(jobToAdd[2]))
-          .Aggregate(orderedJobs, (current, job) => current + job[0]);
+        orderedJobs = AddJobsWhereDependencyHasBeenOrdered(jobsToAdd, orderedJobs);
         jobsToAdd = GetJobsToAdd(splitJobs, orderedJobs);
       }
 
       return orderedJobs;
+    }
+
+    private static string AddJobsWhereDependencyHasBeenOrdered(List<string> jobsToAdd, string orderedJobs)
+    {
+      return jobsToAdd
+        .Where(jobToAdd => orderedJobs.Contains(jobToAdd[2]))
+        .Aggregate(orderedJobs, (current, job) => current + job[0]);
     }
 
     private static List<string> GetJobsToAdd(string[] splitJobs, string orderedJobs)
