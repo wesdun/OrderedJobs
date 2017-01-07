@@ -18,10 +18,10 @@ namespace OrderedJobs.Acceptance.Test
       var indexOfD = orderedJobs.IndexOf("d");
       var indexOfE = orderedJobs.IndexOf("e");
       var indexOfF = orderedJobs.IndexOf("f");
-      Assert.That(indexOfB, Is.LessThan(indexOfC));
-      Assert.That(indexOfC, Is.LessThan(indexOfF));
-      Assert.That(indexOfD, Is.LessThan(indexOfA));
-      Assert.That(indexOfE, Is.LessThan(indexOfB));
+      Assert.That(indexOfB, Is.GreaterThan(indexOfC));
+      Assert.That(indexOfC, Is.GreaterThan(indexOfF));
+      Assert.That(indexOfD, Is.GreaterThan(indexOfA));
+      Assert.That(indexOfE, Is.GreaterThan(indexOfB));
     }
 
     [Test]
