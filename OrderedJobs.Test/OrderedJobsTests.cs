@@ -10,7 +10,7 @@ namespace OrderedJobs.Test
     public class OrderedJobsTests
     {
       [Test]
-      public void TestOne()
+      public void SetupTest()
       {
         Assert.That(true, Is.EqualTo(true));
       }

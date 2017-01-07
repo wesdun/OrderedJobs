@@ -7,20 +7,20 @@ using Microsoft.AspNetCore.Mvc;
 namespace OrderedJobs.Controllers
 {
     [Route("api/[controller]")]
-    public class ValuesController : Controller
+    public class OrderedJobsController : Controller
     {
         // GET api/values
         [HttpGet]
-        public IEnumerable<string> Get()
+        public string Get()
         {
-            return new string[] { "value1", "value2" };
+            return "value1";
         }
 
         // GET api/values/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public string Get(string dependencies)
         {
-            return "value";
+            return dependencies;
         }
 
         // POST api/values
