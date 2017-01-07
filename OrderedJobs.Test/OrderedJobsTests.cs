@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using OrderedJobs.Domain;
 
 namespace OrderedJobs.Test
 {
@@ -10,9 +11,9 @@ namespace OrderedJobs.Test
     public class OrderedJobsTests
     {
       [Test]
-      public void SetupTest()
+      public void EmptyStringTest()
       {
-        Assert.That(true, Is.EqualTo(true));
+        Assert.That(JobOrderer.Order(""), Is.EqualTo(""));
       }
     }
 }

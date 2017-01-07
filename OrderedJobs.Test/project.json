@@ -7,7 +7,8 @@
       "version": "1.0.1",
       "type": "platform"
     },
-    "NUnit": "3.5.0"
+    "NUnit": "3.5.0",
+    "OrderedJobs.Domain": "1.0.0-*"
   },
   "testRunner": "nunit",
   "frameworks": {
