@@ -23,7 +23,7 @@ namespace OrderedJobs.Controllers
     [HttpGet]
     public async Task<string> Get(string url)
     {
-      var response = await _httpClient.GetAsync("http://localhost:55070/api/orderedjobs");
+      var response = await _httpClient.GetAsync(url);
       return await response.Content.ReadAsStringAsync();
     }
 
