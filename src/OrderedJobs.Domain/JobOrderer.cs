@@ -10,7 +10,7 @@ namespace OrderedJobs.Domain
       if (jobsData.Length == 0) return "";
 
       var jobs = CreateJobs(jobsData).ToList();
-      var orderedJobs = GetJobsWithNoDependencies(jobs);
+      var orderedJobs = AddJobsWithNoDependencies(jobs);
       var jobsToAdd = GetJobsToAdd(jobs, orderedJobs);
       var numberOfJobsToAdd = jobsToAdd.Count;
       while (jobsToAdd.Any())
@@ -35,7 +35,7 @@ namespace OrderedJobs.Domain
         throw new CircularDependencyException();
     }
 
-    private static string AddJobsWhereDependencyHasBeenOrdered(List<Job> jobsToAdd, string orderedJobs)
+    private static string AddJobsWhereDependencyHasBeenOrdered(IEnumerable<Job> jobsToAdd, string orderedJobs)
     {
       return jobsToAdd
         .Where(jobToAdd => orderedJobs.Contains(jobToAdd.Dependency))
@@ -47,7 +47,7 @@ namespace OrderedJobs.Domain
       return jobs.Where(job => !orderedJobs.Contains(job.Name)).ToList();
     }
 
-    private static string GetJobsWithNoDependencies(IEnumerable<Job> splitJobs)
+    private static string AddJobsWithNoDependencies(IEnumerable<Job> splitJobs)
     {
       return splitJobs
         .Where(job => !job.HasDependency())
