@@ -7,28 +7,36 @@ namespace OrderedJobs.Test
   [TestFixture]
   public class OrderedJobsTests
   {
+    private JobOrderer _jobOrderer;
+
+    [SetUp]
+    public void Init()
+    {
+      _jobOrderer = new JobOrderer();
+    }
+
     [Test]
     public void EmptyStringTest()
     {
-      Assert.That(JobOrderer.Order(""), Is.EqualTo(""));
+      Assert.That(_jobOrderer.Order(""), Is.EqualTo(""));
     }
 
     [Test]
     public void SingleJobNoDependencyTest()
     {
-      Assert.That(JobOrderer.Order("a-"), Is.EqualTo("a"));
+      Assert.That(_jobOrderer.Order("a-"), Is.EqualTo("a"));
     }
 
     [Test]
     public void MultipleJobsNoDependencyTest()
     {
-      Assert.That(JobOrderer.Order("a-|b-|c-"), Is.EqualTo("abc"));
+      Assert.That(_jobOrderer.Order("a-|b-|c-"), Is.EqualTo("abc"));
     }
 
     [Test]
     public void MultipleJobsSingleDependencyTest()
     {
-      var orderedJobs = JobOrderer.Order("a-|b-c|c-");
+      var orderedJobs = _jobOrderer.Order("a-|b-c|c-");
       var indexOfB = orderedJobs.IndexOf("b");
       var indexOfC = orderedJobs.IndexOf("c");
       Assert.That(indexOfB, Is.GreaterThan(indexOfC));
@@ -38,7 +46,7 @@ namespace OrderedJobs.Test
     [Test]
     public void MultipleJobsMultipleDependenciesTest()
     {
-      var orderedJobs = JobOrderer.Order("a-|b-c|c-f|d-a|e-b|f-");
+      var orderedJobs = _jobOrderer.Order("a-|b-c|c-f|d-a|e-b|f-");
       var indexOfA = orderedJobs.IndexOf("a");
       var indexOfB = orderedJobs.IndexOf("b");
       var indexOfC = orderedJobs.IndexOf("c");
@@ -60,7 +68,7 @@ namespace OrderedJobs.Test
 
     private void OrderSelfReferencingJob()
     {
-      JobOrderer.Order("a-|b-|c-c");
+      _jobOrderer.Order("a-|b-|c-c");
     }
 
     [Test]
@@ -71,7 +79,7 @@ namespace OrderedJobs.Test
 
     private void OrderCircularDependencyJobs()
     {
-      JobOrderer.Order("a-|b-c|c-f|d-a|e-|f-b");
+      _jobOrderer.Order("a-|b-c|c-f|d-a|e-|f-b");
     }
   }
 }

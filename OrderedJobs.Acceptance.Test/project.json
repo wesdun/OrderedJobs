@@ -7,6 +7,7 @@
       "version": "1.0.1",
       "type": "platform"
     },
+    "Moq": "4.6.38-alpha",
     "NUnit": "3.5.0",
     "OrderedJobs": "1.0.0-*"
   },

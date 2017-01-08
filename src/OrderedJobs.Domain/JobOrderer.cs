@@ -5,7 +5,7 @@ namespace OrderedJobs.Domain
 {
   public class JobOrderer
   {
-    public static string Order(string jobsData)
+    public string Order(string jobsData)
     {
       if (jobsData.Length == 0) return "";
 
