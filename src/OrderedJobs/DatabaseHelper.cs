@@ -10,7 +10,8 @@ namespace OrderedJobs
 
     public DatabaseHelper()
     {
-      var mongoClient = new MongoClient();
+      var connectionString = "mongodb://localhost:27017";
+      var mongoClient = new MongoClient(connectionString);
       var db = mongoClient.GetDatabase("OrderedJobs");
       _collection = db.GetCollection<TestCase>("testCases");
       _collection.Indexes.CreateOneAsync(new BsonDocument("Jobs", 1), new CreateIndexOptions {Unique = true});
