@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System.Net.Http;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,6 +29,8 @@ namespace OrderedJobs
       services.AddMvc();
 
       services.AddSingleton<JobOrderer, JobOrderer>();
+      services.AddSingleton<HttpClient, HttpClient>();
+      services.AddSingleton<DatabaseHelper, DatabaseHelper>();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
