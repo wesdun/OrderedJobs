@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using Moq;
 using NUnit.Framework;
 using OrderedJobs.Controllers;
 using OrderedJobs.Domain;
@@ -12,8 +11,7 @@ namespace OrderedJobs.Acceptance.Test
     [Test]
     public void GetOrderedJobsAreInOrderTest()
     {
-      var jobOrdererMock = new Mock<JobOrderer>();
-      var orderedJobsController = new OrderedJobsController(jobOrdererMock.Object);
+      var orderedJobsController = new OrderedJobsController(new JobOrderer());
       var orderedJobs = orderedJobsController.Get("a-|b-c|c-f|d-a|e-b|f-");
       var indexOfA = orderedJobs.IndexOf("a");
       var indexOfB = orderedJobs.IndexOf("b");
@@ -30,8 +28,7 @@ namespace OrderedJobs.Acceptance.Test
     [Test]
     public void GetOrderedJobsHasOneOfEachJobTest()
     {
-      var jobOrdererMock = new Mock<JobOrderer>();
-      var orderedJobsController = new OrderedJobsController(jobOrdererMock.Object);
+      var orderedJobsController = new OrderedJobsController(new JobOrderer());
       var orderedJobs = orderedJobsController.Get("a-|b-c|c-f|d-a|e-b|f-");
       Assert.That(orderedJobs.Length, Is.EqualTo(orderedJobs.ToCharArray().Distinct().Count()));
     }
