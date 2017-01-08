@@ -62,5 +62,16 @@ namespace OrderedJobs.Test
     {
       JobOrderer.Order("a-|b-|c-c");
     }
+
+    [Test]
+    public void CircularDependencyTest()
+    {
+      Assert.Throws<CircularDependencyException>(OrderCircularDependencyJobs);
+    }
+
+    private void OrderCircularDependencyJobs()
+    {
+      JobOrderer.Order("a-|b-c|c-f|d-a|e-|f-b");
+    }
   }
 }

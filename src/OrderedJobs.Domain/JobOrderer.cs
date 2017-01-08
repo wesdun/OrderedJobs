@@ -13,10 +13,14 @@ namespace OrderedJobs.Domain
       var orderedJobs = GetJobsWithNoDependencies(splitJobs);
       var jobsToAdd = GetJobsToAdd(splitJobs, orderedJobs);
       CheckForSelfReference(jobsToAdd);
+      var numberOfJobsToAdd = jobsToAdd.Count;
       while (jobsToAdd.Any())
       {
         orderedJobs = AddJobsWhereDependencyHasBeenOrdered(jobsToAdd, orderedJobs);
         jobsToAdd = GetJobsToAdd(splitJobs, orderedJobs);
+        if (numberOfJobsToAdd == jobsToAdd.Count) 
+          throw new CircularDependencyException();
+        numberOfJobsToAdd = jobsToAdd.Count;
       }
 
       return orderedJobs;
