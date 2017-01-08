@@ -12,6 +12,7 @@ namespace OrderedJobs.Domain
 
       var orderedJobs = GetJobsWithNoDependencies(splitJobs);
       var jobsToAdd = GetJobsToAdd(splitJobs, orderedJobs);
+      CheckForSelfReference(jobsToAdd);
       while (jobsToAdd.Any())
       {
         orderedJobs = AddJobsWhereDependencyHasBeenOrdered(jobsToAdd, orderedJobs);
@@ -19,6 +20,12 @@ namespace OrderedJobs.Domain
       }
 
       return orderedJobs;
+    }
+
+    private static void CheckForSelfReference(List<string> jobsToAdd)
+    {
+      if (jobsToAdd.Any(job => job[0] == job[2]))
+        throw new SelfReferencingException();
     }
 
     private static string AddJobsWhereDependencyHasBeenOrdered(List<string> jobsToAdd, string orderedJobs)

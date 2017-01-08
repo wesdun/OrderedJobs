@@ -51,5 +51,16 @@ namespace OrderedJobs.Test
       Assert.That(indexOfE, Is.GreaterThan(indexOfB));
       Assert.That(orderedJobs.Length, Is.EqualTo(orderedJobs.ToCharArray().Distinct().Count()));
     }
+
+    [Test]
+    public void SelfReferencingTest()
+    {
+      Assert.Throws<SelfReferencingException>(OrderSelfReferencingJob);
+    }
+
+    public void OrderSelfReferencingJob()
+    {
+      JobOrderer.Order("a-|b-|c-c");
+    }
   }
 }
