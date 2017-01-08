@@ -7,25 +7,41 @@ namespace OrderedJobs.Test
   [TestFixture]
   public class OrderedJobsTesterTests
   {
+    private OrderedJobsTester _orderedJobsTester;
+
+    [SetUp]
+    public void Init()
+    {
+      _orderedJobsTester = new OrderedJobsTester();
+    }
     [Test]
     public void VerifyNoDependenciesTest()
     {
-      var orderedJobsTester = new OrderedJobsTester();
-      Assert.That(orderedJobsTester.Verify("a-|b-|c-", "abc"), Is.EqualTo("PASS"));
+      Assert.That(_orderedJobsTester.Verify("a-|b-|c-", "abc"), Is.EqualTo("PASS"));
     }
 
     [Test]
     public void VerifyAllJobsGetOrderedTest()
     {
-      var orderedJobsTester = new OrderedJobsTester();
-      Assert.That(orderedJobsTester.Verify("a-|b-|c-", "ab"), Is.EqualTo("FAIL"));
+      Assert.That(_orderedJobsTester.Verify("a-|b-|c-", "ab"), Is.EqualTo("FAIL"));
     }
 
     [Test]
     public void VerifyNoJobsAreRepeatedTest()
     {
-      var orderedJobsTester = new OrderedJobsTester();
-      Assert.That(orderedJobsTester.Verify("a-|b-|c-", "abbc"), Is.EqualTo("FAIL"));
+      Assert.That(_orderedJobsTester.Verify("a-|b-|c-", "abbc"), Is.EqualTo("FAIL"));
+    }
+
+    [Test]
+    public void VerifyDependenciesPassTest()
+    {
+      Assert.That(_orderedJobsTester.Verify("a-b|b-|c-a", "bac"), Is.EqualTo("PASS"));
+    }
+
+    [Test]
+    public void VerifyDependenciesFailTest()
+    {
+      Assert.That(_orderedJobsTester.Verify("a-b|b-|c-a", "bca"), Is.EqualTo("FAIL"));
     }
   }
 }
