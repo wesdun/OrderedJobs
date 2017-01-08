@@ -5,50 +5,60 @@ namespace OrderedJobs.Domain
 {
   public class JobOrderer
   {
-    public static string Order(string jobs)
+    public static string Order(string jobsData)
     {
-      if (jobs.Length == 0) return "";
-      var splitJobs = jobs.Split('|');
+      if (jobsData.Length == 0) return "";
 
-      var orderedJobs = GetJobsWithNoDependencies(splitJobs);
-      var jobsToAdd = GetJobsToAdd(splitJobs, orderedJobs);
+      var jobs = CreateJobs(jobsData).ToList();
+      var orderedJobs = GetJobsWithNoDependencies(jobs);
+      var jobsToAdd = GetJobsToAdd(jobs, orderedJobs);
       CheckForSelfReference(jobsToAdd);
       var numberOfJobsToAdd = jobsToAdd.Count;
       while (jobsToAdd.Any())
       {
         orderedJobs = AddJobsWhereDependencyHasBeenOrdered(jobsToAdd, orderedJobs);
-        jobsToAdd = GetJobsToAdd(splitJobs, orderedJobs);
-        if (numberOfJobsToAdd == jobsToAdd.Count) 
-          throw new CircularDependencyException();
+        jobsToAdd = GetJobsToAdd(jobs, orderedJobs);
+        CheckForCircularDependency(numberOfJobsToAdd, jobsToAdd);
         numberOfJobsToAdd = jobsToAdd.Count;
       }
 
       return orderedJobs;
     }
 
-    private static void CheckForSelfReference(List<string> jobsToAdd)
+    private static IEnumerable<Job> CreateJobs(string jobsData)
     {
-      if (jobsToAdd.Any(job => job[0] == job[2]))
+      return jobsData.Split('|').Select(jobData => new Job(jobData));
+    }
+
+    private static void CheckForCircularDependency(int numberOfJobsToAdd, List<Job> jobsToAdd)
+    {
+      if (numberOfJobsToAdd == jobsToAdd.Count)
+        throw new CircularDependencyException();
+    }
+
+    private static void CheckForSelfReference(List<Job> jobsToAdd)
+    {
+      if (jobsToAdd.Any(job => job.Name == job.Dependency))
         throw new SelfReferencingException();
     }
 
-    private static string AddJobsWhereDependencyHasBeenOrdered(List<string> jobsToAdd, string orderedJobs)
+    private static string AddJobsWhereDependencyHasBeenOrdered(List<Job> jobsToAdd, string orderedJobs)
     {
       return jobsToAdd
-        .Where(jobToAdd => orderedJobs.Contains(jobToAdd[2]))
-        .Aggregate(orderedJobs, (current, job) => current + job[0]);
+        .Where(jobToAdd => orderedJobs.Contains(jobToAdd.Dependency))
+        .Aggregate(orderedJobs, (current, job) => current + job.Name);
     }
 
-    private static List<string> GetJobsToAdd(string[] splitJobs, string orderedJobs)
+    private static List<Job> GetJobsToAdd(IEnumerable<Job> jobs, string orderedJobs)
     {
-      return splitJobs.Where(job => !orderedJobs.Contains(job[0])).ToList();
+      return jobs.Where(job => !orderedJobs.Contains(job.Name)).ToList();
     }
 
-    private static string GetJobsWithNoDependencies(string[] splitJobs)
+    private static string GetJobsWithNoDependencies(IEnumerable<Job> splitJobs)
     {
       return splitJobs
-        .Where(job => job[job.Length - 1] == '-')
-        .Aggregate("", (current, job) => current + job[0]);
+        .Where(job => !job.HasDependency())
+        .Aggregate("", (current, job) => current + job.Name);
     }
   }
 }

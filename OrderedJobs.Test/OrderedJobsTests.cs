@@ -58,7 +58,7 @@ namespace OrderedJobs.Test
       Assert.Throws<SelfReferencingException>(OrderSelfReferencingJob);
     }
 
-    public void OrderSelfReferencingJob()
+    private void OrderSelfReferencingJob()
     {
       JobOrderer.Order("a-|b-|c-c");
     }
