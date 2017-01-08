@@ -12,7 +12,6 @@ namespace OrderedJobs.Domain
       var jobs = CreateJobs(jobsData).ToList();
       var orderedJobs = GetJobsWithNoDependencies(jobs);
       var jobsToAdd = GetJobsToAdd(jobs, orderedJobs);
-      CheckForSelfReference(jobsToAdd);
       var numberOfJobsToAdd = jobsToAdd.Count;
       while (jobsToAdd.Any())
       {
@@ -34,12 +33,6 @@ namespace OrderedJobs.Domain
     {
       if (numberOfJobsToAdd == jobsToAdd.Count)
         throw new CircularDependencyException();
-    }
-
-    private static void CheckForSelfReference(List<Job> jobsToAdd)
-    {
-      if (jobsToAdd.Any(job => job.Name == job.Dependency))
-        throw new SelfReferencingException();
     }
 
     private static string AddJobsWhereDependencyHasBeenOrdered(List<Job> jobsToAdd, string orderedJobs)
