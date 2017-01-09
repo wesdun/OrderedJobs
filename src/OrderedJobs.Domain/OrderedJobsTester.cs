@@ -8,13 +8,12 @@ namespace OrderedJobs.Domain
     public string Verify(string testCase, string orderedJobs)
     {
       var jobs = CreateJobs(testCase);
-      foreach (var job in jobs)
-      {
-        var occurrencesOfJob = orderedJobs.Count(orderedJob => orderedJob.ToString() == job.Name);
-        if (occurrencesOfJob != 1 || IsJobBeforeDependency(orderedJobs, job))
-          return "FAIL";
-      }
-      return "PASS";
+      return (from job in jobs
+        let occurrencesOfJob = orderedJobs.Count(orderedJob => orderedJob.ToString() == job.Name)
+        where occurrencesOfJob != 1 || IsJobBeforeDependency(orderedJobs, job)
+        select job).Any()
+        ? "FAIL"
+        : "PASS";
     }
 
     private static bool IsJobBeforeDependency(string orderedJobs, Job job)
