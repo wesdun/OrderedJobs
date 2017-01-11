@@ -22,5 +22,10 @@
     {
       return Dependency != string.Empty;
     }
+
+    public override string ToString()
+    {
+      return Name + "-" + Dependency;
+    }
   }
 }

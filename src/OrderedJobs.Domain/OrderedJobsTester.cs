@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace OrderedJobs.Domain
@@ -24,6 +25,22 @@ namespace OrderedJobs.Domain
     private static IEnumerable<Job> CreateJobs(string jobsData)
     {
       return jobsData.Split('|').Select(jobData => new Job(jobData));
+    }
+
+    public string[] GetTestCasePermutations(string testCase)
+    {
+      var jobs = CreateJobs(testCase).ToArray();
+      return GetPermutations(jobs)
+          .Select(permutation => string.Join<Job>("|", permutation))
+          .ToArray();
+    }
+    
+    public IEnumerable<IEnumerable<Job>> GetPermutations(IEnumerable<Job> jobs)
+    {
+      if (jobs.Count() == 1) return jobs.Select(job => new [] { job });
+
+      return jobs.SelectMany(job => GetPermutations(jobs.Except(new List<Job> {job})),
+        (job, permutation) => new List<Job> {job}.Concat(permutation));
     }
   }
 }
