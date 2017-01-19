@@ -10,6 +10,7 @@ namespace OrderedJobs.Domain
       if (jobsData.Length == 0) return "";
 
       var jobs = CreateJobs(jobsData).ToList();
+      if (jobs.Any(job => job.Name == job.Dependency)) return "ERROR: JObs can't be self referencing.";
       var orderedJobs = AddJobsWithNoDependencies(jobs);
       var jobsToAdd = GetJobsToAdd(jobs, orderedJobs);
       var numberOfJobsToAdd = jobsToAdd.Count;
@@ -17,7 +18,7 @@ namespace OrderedJobs.Domain
       {
         orderedJobs = AddJobsWhereDependencyHasBeenOrdered(jobsToAdd, orderedJobs);
         jobsToAdd = GetJobsToAdd(jobs, orderedJobs);
-        CheckForCircularDependency(numberOfJobsToAdd, jobsToAdd);
+        if (HasCircularDependency(numberOfJobsToAdd, jobsToAdd)) return "ERROR: Jobs can't depend on themselves.";
         numberOfJobsToAdd = jobsToAdd.Count;
       }
 
@@ -29,10 +30,9 @@ namespace OrderedJobs.Domain
       return jobsData.Split('|').Select(jobData => new Job(jobData));
     }
 
-    private static void CheckForCircularDependency(int numberOfJobsToAdd, List<Job> jobsToAdd)
+    private static bool HasCircularDependency(int numberOfJobsToAdd, List<Job> jobsToAdd)
     {
-      if (numberOfJobsToAdd == jobsToAdd.Count)
-        throw new CircularDependencyException();
+      return (numberOfJobsToAdd == jobsToAdd.Count);
     }
 
     private static string AddJobsWhereDependencyHasBeenOrdered(IEnumerable<Job> jobsToAdd, string orderedJobs)

@@ -63,23 +63,13 @@ namespace OrderedJobs.Test
     [Test]
     public void SelfReferencingTest()
     {
-      Assert.Throws<SelfReferencingException>(OrderSelfReferencingJob);
-    }
-
-    private void OrderSelfReferencingJob()
-    {
-      _jobOrderer.Order("a-|b-|c-c");
+      Assert.That(_jobOrderer.Order("a-|b-|c-c"), Is.EqualTo("ERROR: JObs can't be self referencing."));
     }
 
     [Test]
     public void CircularDependencyTest()
     {
-      Assert.Throws<CircularDependencyException>(OrderCircularDependencyJobs);
-    }
-
-    private void OrderCircularDependencyJobs()
-    {
-      _jobOrderer.Order("a-|b-c|c-f|d-a|e-|f-b");
+      Assert.That(_jobOrderer.Order("a-|b-c|c-f|d-a|e-|f-b"), Is.EqualTo("ERROR: Jobs can't depend on themselves."));
     }
   }
 }
