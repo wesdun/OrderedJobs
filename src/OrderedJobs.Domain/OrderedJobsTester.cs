@@ -6,12 +6,17 @@ namespace OrderedJobs.Domain
 {
   public class OrderedJobsTester
   {
-    public string Verify(string testCase, string orderedJobs)
+    public TestCaseResult Verify(string testCase, string orderedJobs)
     {
       var jobOrderer = new JobOrderer();
       var expectedOrdererJobs = jobOrderer.Order(testCase);
-      if (expectedOrdererJobs.Contains("ERROR")) return VerifyError(orderedJobs, expectedOrdererJobs);
+      if (expectedOrdererJobs.Contains("ERROR")) return new TestCaseResult(testCase, VerifyError(orderedJobs, expectedOrdererJobs));
       var jobs = CreateJobs(testCase);
+      return new TestCaseResult(testCase, VerifyJobCountAndDependecyOrder(orderedJobs, jobs));
+    }
+
+    private static string VerifyJobCountAndDependecyOrder(string orderedJobs, IEnumerable<Job> jobs)
+    {
       return (from job in jobs
         let occurrencesOfJob = orderedJobs.Count(orderedJob => orderedJob.ToString() == job.Name)
         where occurrencesOfJob != 1 || IsJobBeforeDependency(orderedJobs, job)
@@ -51,6 +56,18 @@ namespace OrderedJobs.Domain
 
       return jobs.SelectMany(job => GetPermutations(jobs.Except(new List<Job> {job})),
         (job, permutation) => new List<Job> {job}.Concat(permutation));
+    }
+
+    public TestCasePermutationsResult VerifyAllPermutations(string testCase, string orderedJobs)
+    {
+      var testCasePermutationsResult = new TestCasePermutationsResult(testCase);
+      var testCasePermutations = GetTestCasePermutations(testCase);
+      testCasePermutationsResult.Results = testCasePermutations.Select(permutation => Verify(permutation, orderedJobs)).ToArray();
+      testCasePermutationsResult.Result =
+        testCasePermutationsResult.Results.All(testCaseResult => testCaseResult.Result == "PASS")
+          ? "PASS"
+          : "FAIL";
+      return testCasePermutationsResult;
     }
   }
 }
