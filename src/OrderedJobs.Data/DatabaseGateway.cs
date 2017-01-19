@@ -1,20 +1,24 @@
-﻿using MongoDB.Bson;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using MongoDB.Bson;
 using MongoDB.Driver;
-using OrderedJobs.Models;
+using OrderedJobs.Data.Models;
 
-namespace OrderedJobs
+namespace OrderedJobs.Data
 {
-  public class DatabaseHelper
-  {
+    public class DatabaseGateway
+    {
     private readonly IMongoCollection<TestCase> _collection;
 
-    public DatabaseHelper()
+    public DatabaseGateway()
     {
       var connectionString = "mongodb://localhost:27017";
       var mongoClient = new MongoClient(connectionString);
       var db = mongoClient.GetDatabase("OrderedJobs");
       _collection = db.GetCollection<TestCase>("testCases");
-      _collection.Indexes.CreateOneAsync(new BsonDocument("Jobs", 1), new CreateIndexOptions {Unique = true});
+      _collection.Indexes.CreateOneAsync(new BsonDocument("Jobs", 1), new CreateIndexOptions { Unique = true });
     }
 
     public async void AddTestCase(TestCase testCase)

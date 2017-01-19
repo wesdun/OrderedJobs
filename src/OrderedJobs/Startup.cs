@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using OrderedJobs.Data;
 using OrderedJobs.Domain;
 
 namespace OrderedJobs
@@ -30,7 +31,7 @@ namespace OrderedJobs
 
       services.AddSingleton<JobOrderer, JobOrderer>();
       services.AddSingleton<HttpClient, HttpClient>();
-      services.AddSingleton<DatabaseHelper, DatabaseHelper>();
+      services.AddSingleton<DatabaseGateway, DatabaseGateway>();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

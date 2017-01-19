@@ -2,7 +2,8 @@
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using OrderedJobs.Models;
+using OrderedJobs.Data;
+using OrderedJobs.Data.Models;
 
 namespace OrderedJobs.Controllers
 {
@@ -10,12 +11,12 @@ namespace OrderedJobs.Controllers
   public class TestController : Controller
   {
     private readonly HttpClient _httpClient;
-    private readonly DatabaseHelper _dbHelper;
+    private readonly DatabaseGateway _dbGateway;
 
-    public TestController(HttpClient httpClient, DatabaseHelper dbHelper)
+    public TestController(HttpClient httpClient, DatabaseGateway dbGateway)
     {
       _httpClient = httpClient;
-      _dbHelper = dbHelper;
+      _dbGateway = dbGateway;
       _httpClient.DefaultRequestHeaders.Clear();
       _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
     }
@@ -30,19 +31,19 @@ namespace OrderedJobs.Controllers
     [HttpPost]
     public void Post([FromBody] TestCase testCase)
     {
-      _dbHelper.AddTestCase(testCase);
+      _dbGateway.AddTestCase(testCase);
     }
 
     [HttpDelete]
     public void Delete()
     {
-      _dbHelper.DeleteAllTestCases();
+      _dbGateway.DeleteAllTestCases();
     }
 
     [HttpDelete("{jobs}")]
     public void Delete(string jobs)
     {
-      _dbHelper.DeleteTestCase(new TestCase(jobs));
+      _dbGateway.DeleteTestCase(new TestCase(jobs));
     }
   }
 }
