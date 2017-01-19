@@ -8,6 +8,9 @@ namespace OrderedJobs.Domain
   {
     public string Verify(string testCase, string orderedJobs)
     {
+      var jobOrderer = new JobOrderer();
+      var expectedOrdererJobs = jobOrderer.Order(testCase);
+      if (expectedOrdererJobs.Contains("ERROR")) return VerifyError(orderedJobs, expectedOrdererJobs);
       var jobs = CreateJobs(testCase);
       return (from job in jobs
         let occurrencesOfJob = orderedJobs.Count(orderedJob => orderedJob.ToString() == job.Name)
@@ -15,6 +18,13 @@ namespace OrderedJobs.Domain
         select job).Any()
         ? "FAIL"
         : "PASS";
+    }
+
+    private string VerifyError(string orderedJobs, string expectedOrdererJobs)
+    {
+      return orderedJobs == expectedOrdererJobs
+        ? "PASS"
+        : "FAIL";
     }
 
     private static bool IsJobBeforeDependency(string orderedJobs, Job job)

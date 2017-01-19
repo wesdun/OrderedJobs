@@ -63,7 +63,7 @@ namespace OrderedJobs.Test
     [Test]
     public void SelfReferencingTest()
     {
-      Assert.That(_jobOrderer.Order("a-|b-|c-c"), Is.EqualTo("ERROR: JObs can't be self referencing."));
+      Assert.That(_jobOrderer.Order("a-|b-|c-c"), Is.EqualTo("ERROR: Jobs can't be self referencing."));
     }
 
     [Test]

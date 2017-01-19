@@ -10,7 +10,7 @@ namespace OrderedJobs.Domain
       if (jobsData.Length == 0) return "";
 
       var jobs = CreateJobs(jobsData).ToList();
-      if (jobs.Any(job => job.Name == job.Dependency)) return "ERROR: JObs can't be self referencing.";
+      if (jobs.Any(job => job.Name == job.Dependency)) return "ERROR: Jobs can't be self referencing.";
       var orderedJobs = AddJobsWithNoDependencies(jobs);
       var jobsToAdd = GetJobsToAdd(jobs, orderedJobs);
       var numberOfJobsToAdd = jobsToAdd.Count;

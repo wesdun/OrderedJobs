@@ -69,5 +69,17 @@ namespace OrderedJobs.Test
       };
       Assert.That(_orderedJobsTester.GetTestCasePermutations("a-|b-|c-"), Is.EquivalentTo(expectedPermutations));
     }
+
+    [Test]
+    public void VerifySelfReferencingErrorPass()
+    {
+      Assert.That(_orderedJobsTester.Verify("a-b|b-b|c-a", "ERROR: Jobs can't be self referencing."), Is.EqualTo("PASS"));
+    }
+
+    [Test]
+    public void VerifyCircularDependencyErrorPass()
+    {
+      Assert.That(_orderedJobsTester.Verify("a-|b-c|c-f|d-a|e-|f-b", "ERROR: Jobs can't depend on themselves."), Is.EqualTo("PASS"));
+    }
   }
 }
