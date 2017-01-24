@@ -1,31 +1,30 @@
-﻿using System.Net.Http;
-using System.Net.Http.Headers;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using OrderedJobs.Data;
 using OrderedJobs.Data.Models;
+using OrderedJobs.Domain;
 
 namespace OrderedJobs.Controllers
 {
   [Route("api/[controller]")]
   public class TestController : Controller
   {
-    private readonly HttpClient _httpClient;
     private readonly DatabaseGateway _dbGateway;
+    private readonly OrderedJobsTester _orderedJobsTester;
 
-    public TestController(HttpClient httpClient, DatabaseGateway dbGateway)
+    public TestController(DatabaseGateway dbGateway, OrderedJobsTester orderedJobsTester)
     {
-      _httpClient = httpClient;
       _dbGateway = dbGateway;
-      _httpClient.DefaultRequestHeaders.Clear();
-      _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+      _orderedJobsTester = orderedJobsTester;
     }
 
     [HttpGet]
-    public async Task<string> Get(string url)
+    public async Task<TestResult> Get(string url)
     {
-      var response = await _httpClient.GetAsync(url);
-      return await response.Content.ReadAsStringAsync();
+      var testCases = await _dbGateway.GetAllTestCases();
+      var testCaseStrings = testCases.Select(testCase => testCase.Jobs).ToArray();
+      return _orderedJobsTester.VerifyAllTestCases(url, testCaseStrings);
     }
 
     [HttpPost]

@@ -30,8 +30,9 @@ namespace OrderedJobs
       services.AddMvc();
 
       services.AddSingleton<JobOrderer, JobOrderer>();
-      services.AddSingleton<HttpClient, HttpClient>();
       services.AddSingleton<DatabaseGateway, DatabaseGateway>();
+      services.AddSingleton<OrderedJobsCaller, OrderedJobsCaller>();
+      services.AddSingleton<OrderedJobsTester, OrderedJobsTester>();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

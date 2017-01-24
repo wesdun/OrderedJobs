@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using Moq;
+using NUnit.Framework;
 using OrderedJobs.Domain;
 
 namespace OrderedJobs.Test
@@ -11,37 +12,60 @@ namespace OrderedJobs.Test
     [SetUp]
     public void Init()
     {
-      _orderedJobsTester = new OrderedJobsTester();
+      var orderedJobsCallerMock = new Mock<OrderedJobsCaller>();
+      _orderedJobsTester = new OrderedJobsTester(orderedJobsCallerMock.Object);
     }
 
     [Test]
     public void VerifyNoDependenciesTest()
     {
-      Assert.That(_orderedJobsTester.Verify("a-|b-|c-", "abc").Result, Is.EqualTo("PASS"));
+      var orderedJobsCallerMock = new Mock<OrderedJobsCaller>();
+      orderedJobsCallerMock.Setup(orderedJobsTester => orderedJobsTester.GetOrderedJobs(It.IsAny<string>(), "a-|b-|c-"))
+        .ReturnsAsync("abc");
+      _orderedJobsTester = new OrderedJobsTester(orderedJobsCallerMock.Object);
+      Assert.That(_orderedJobsTester.Verify("", "a-|b-|c-").Result.Result, Is.EqualTo("PASS"));
     }
 
     [Test]
     public void VerifyAllJobsGetOrderedTest()
     {
-      Assert.That(_orderedJobsTester.Verify("a-|b-|c-", "ab").Result, Is.EqualTo("FAIL"));
+      var orderedJobsCallerMock = new Mock<OrderedJobsCaller>();
+      orderedJobsCallerMock.Setup(orderedJobsTester => orderedJobsTester.GetOrderedJobs(It.IsAny<string>(), "a-|b-|c-"))
+        .ReturnsAsync("ab");
+      _orderedJobsTester = new OrderedJobsTester(orderedJobsCallerMock.Object);
+      Assert.That(_orderedJobsTester.Verify("", "a-|b-|c-").Result.Result, Is.EqualTo("FAIL"));
     }
 
     [Test]
     public void VerifyNoJobsAreRepeatedTest()
     {
-      Assert.That(_orderedJobsTester.Verify("a-|b-|c-", "abbc").Result, Is.EqualTo("FAIL"));
+      var orderedJobsCallerMock = new Mock<OrderedJobsCaller>();
+      orderedJobsCallerMock.Setup(orderedJobsTester => orderedJobsTester.GetOrderedJobs(It.IsAny<string>(), "a-|b-|c-"))
+        .ReturnsAsync("abbc");
+      _orderedJobsTester = new OrderedJobsTester(orderedJobsCallerMock.Object);
+      Assert.That(_orderedJobsTester.Verify("", "a-|b-|c-").Result.Result, Is.EqualTo("FAIL"));
     }
 
     [Test]
     public void VerifyDependenciesPassTest()
     {
-      Assert.That(_orderedJobsTester.Verify("a-b|b-|c-a", "bac").Result, Is.EqualTo("PASS"));
+      var orderedJobsCallerMock = new Mock<OrderedJobsCaller>();
+      orderedJobsCallerMock.Setup(
+          orderedJobsTester => orderedJobsTester.GetOrderedJobs(It.IsAny<string>(), "a-b|b-|c-a"))
+        .ReturnsAsync("bac");
+      _orderedJobsTester = new OrderedJobsTester(orderedJobsCallerMock.Object);
+      Assert.That(_orderedJobsTester.Verify("", "a-b|b-|c-a").Result.Result, Is.EqualTo("PASS"));
     }
 
     [Test]
     public void VerifyDependenciesFailTest()
     {
-      Assert.That(_orderedJobsTester.Verify("a-b|b-|c-a", "bca").Result, Is.EqualTo("FAIL"));
+      var orderedJobsCallerMock = new Mock<OrderedJobsCaller>();
+      orderedJobsCallerMock.Setup(
+          orderedJobsTester => orderedJobsTester.GetOrderedJobs(It.IsAny<string>(), "a-b|b-|c-a"))
+        .ReturnsAsync("bca");
+      _orderedJobsTester = new OrderedJobsTester(orderedJobsCallerMock.Object);
+      Assert.That(_orderedJobsTester.Verify("", "a-b|b-|c-a").Result.Result, Is.EqualTo("FAIL"));
     }
 
     [Test]
@@ -73,21 +97,52 @@ namespace OrderedJobs.Test
     [Test]
     public void VerifySelfReferencingErrorPass()
     {
-      Assert.That(_orderedJobsTester.Verify("a-b|b-b|c-a", "ERROR: Jobs can't be self referencing.").Result,
-        Is.EqualTo("PASS"));
+      var orderedJobsCallerMock = new Mock<OrderedJobsCaller>();
+      orderedJobsCallerMock.Setup(
+          orderedJobsTester => orderedJobsTester.GetOrderedJobs(It.IsAny<string>(), "a-b|b-b|c-a"))
+        .ReturnsAsync("ERROR: Jobs can't be self referencing.");
+      _orderedJobsTester = new OrderedJobsTester(orderedJobsCallerMock.Object);
+      Assert.That(_orderedJobsTester.Verify("", "a-b|b-b|c-a").Result.Result, Is.EqualTo("PASS"));
     }
 
     [Test]
     public void VerifyCircularDependencyErrorPass()
     {
-      Assert.That(_orderedJobsTester.Verify("a-|b-c|c-f|d-a|e-|f-b", "ERROR: Jobs can't depend on themselves.").Result,
+      var orderedJobsCallerMock = new Mock<OrderedJobsCaller>();
+      orderedJobsCallerMock.Setup(
+          orderedJobsTester => orderedJobsTester.GetOrderedJobs(It.IsAny<string>(), "a-|b-c|c-f|d-a|e-|f-b"))
+        .ReturnsAsync("ERROR: Jobs can't depend on themselves.");
+      _orderedJobsTester = new OrderedJobsTester(orderedJobsCallerMock.Object);
+      Assert.That(_orderedJobsTester.Verify("", "a-|b-c|c-f|d-a|e-|f-b").Result.Result,
         Is.EqualTo("PASS"));
     }
 
     [Test]
     public void VerifyAllPermutations()
     {
-      Assert.That(_orderedJobsTester.VerifyAllPermutations("a-|b-", "ab").Result, Is.EqualTo("PASS"));
+      var orderedJobsCallerMock = new Mock<OrderedJobsCaller>();
+      orderedJobsCallerMock.Setup(orderedJobsTester => orderedJobsTester.GetOrderedJobs(It.IsAny<string>(), "a-|b-"))
+        .ReturnsAsync("ab");
+      orderedJobsCallerMock.Setup(orderedJobsTester => orderedJobsTester.GetOrderedJobs(It.IsAny<string>(), "b-|a-"))
+        .ReturnsAsync("ab");
+      _orderedJobsTester = new OrderedJobsTester(orderedJobsCallerMock.Object);
+      Assert.That(_orderedJobsTester.VerifyAllPermutations("", "a-|b-").Result, Is.EqualTo("PASS"));
+    }
+
+    [Test]
+    public void VerifyAllTestCases()
+    {
+      var orderedJobsCallerMock = new Mock<OrderedJobsCaller>();
+      orderedJobsCallerMock.Setup(orderedJobsTester => orderedJobsTester.GetOrderedJobs(It.IsAny<string>(), "a-"))
+        .ReturnsAsync("a");
+      orderedJobsCallerMock.Setup(orderedJobsTester => orderedJobsTester.GetOrderedJobs(It.IsAny<string>(), "a-|b-"))
+        .ReturnsAsync("ab");
+      orderedJobsCallerMock.Setup(orderedJobsTester => orderedJobsTester.GetOrderedJobs(It.IsAny<string>(), "b-|a-"))
+        .ReturnsAsync("ab");
+      _orderedJobsTester = new OrderedJobsTester(orderedJobsCallerMock.Object);
+
+      Assert.That(_orderedJobsTester.VerifyAllTestCases("", new[] {"a-", "a-|b-"}).Result,
+        Is.EqualTo("PASS"));
     }
   }
 }
