@@ -10,19 +10,17 @@ namespace OrderedJobs.Acceptance.Test
   [TestFixture]
   public class TestAcceptanceTests
   {
-    private TestController _testController;
+    private HttpClient _httpClient;
 
     [SetUp]
     public void Init()
     {
-      _testController = new TestController(new HttpClient(), new DatabaseGateway());
-      _testController.Delete();
+      _httpClient = new HttpClient();
     }
 
     [Test]
     public async Task OrderOneJobTest()
     {
-      _testController.Post(new TestCase("a-"));
       var expectedResults = new
       {
         result = "PASS",
@@ -43,7 +41,9 @@ namespace OrderedJobs.Acceptance.Test
           }
         }
       };
-      var results = await _testController.Get("http://localhost:55070/api/orderedJobs");
+      await _httpClient.DeleteAsync("");
+      var results = await _httpClient.GetAsync("test?url=http://localhost:55070/api/orderedJobs");
+
       Assert.That(results, Is.EqualTo(expectedResults));
     }
   }
