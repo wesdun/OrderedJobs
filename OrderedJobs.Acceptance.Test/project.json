@@ -8,6 +8,7 @@
       "type": "platform"
     },
     "Moq": "4.6.38-alpha",
+    "Newtonsoft.Json": "9.0.2-beta2",
     "NUnit": "3.5.0",
     "OrderedJobs": "1.0.0-*"
   },

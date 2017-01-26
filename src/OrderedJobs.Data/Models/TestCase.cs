@@ -16,13 +16,22 @@ namespace OrderedJobs.Data.Models
       Jobs = jobs;
     }
 
-    public bool Equals(TestCase testCase)
+    public bool Equals(TestCase other)
     {
-      if (testCase == null || GetType() != testCase.GetType())
-      {
-        return false;
-      }
-      return Jobs == testCase.Jobs;
+      if (ReferenceEquals(null, other)) return false;
+      return ReferenceEquals(this, other) || string.Equals(Jobs, other.Jobs);
+    }
+
+    public override bool Equals(object obj)
+    {
+      if (ReferenceEquals(null, obj)) return false;
+      if (ReferenceEquals(this, obj)) return true;
+      return obj.GetType() == this.GetType() && Equals((TestCase) obj);
+    }
+
+    public override int GetHashCode()
+    {
+      return Jobs?.GetHashCode() ?? 0;
     }
   }
 }

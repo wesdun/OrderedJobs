@@ -1,50 +1,61 @@
 ﻿using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using NUnit.Framework;
-using OrderedJobs.Controllers;
-using OrderedJobs.Data;
-using OrderedJobs.Data.Models;
+using OrderedJobs.Domain;
 
 namespace OrderedJobs.Acceptance.Test
 {
   [TestFixture]
   public class TestAcceptanceTests
   {
-    private HttpClient _httpClient;
-
-    [SetUp]
-    public void Init()
-    {
-      _httpClient = new HttpClient();
-    }
-
     [Test]
     public async Task OrderOneJobTest()
     {
-      var expectedResults = new
+      var httpClient = new HttpClient();
+      var expectedTestResult = new TestResult
       {
-        result = "PASS",
-        results = new[]
+        Result = "PASS",
+        Results = new[]
         {
-          new
+          new TestCasePermutationsResult("a-|b-a|c-a")
           {
-            testCase = "a-",
-            result = "PASS",
-            results = new[]
+            Result = "PASS",
+            Results = new[]
             {
-              new
-              {
-                testCase = "a-",
-                result = "PASS"
-              }
+              new TestCaseResult("a-|b-a|c-a", "PASS"),
+              new TestCaseResult("a-|c-a|b-a", "PASS"),
+              new TestCaseResult("b-a|a-|c-a", "PASS"),
+              new TestCaseResult("b-a|c-a|a-", "PASS"),
+              new TestCaseResult("c-a|a-|b-a", "PASS"),
+              new TestCaseResult("c-a|b-a|a-", "PASS")
+            }
+          },
+          new TestCasePermutationsResult("a-|b-a")
+          {
+            Result = "PASS",
+            Results = new[]
+            {
+              new TestCaseResult("a-|b-a", "PASS"),
+              new TestCaseResult("b-a|a-", "PASS")
             }
           }
         }
       };
-      await _httpClient.DeleteAsync("");
-      var results = await _httpClient.GetAsync("test?url=http://localhost:55070/api/orderedJobs");
+      await httpClient.DeleteAsync("http://localhost:55070/api/test");
+      var postData = new StringContent(JsonConvert.SerializeObject(new {Jobs = "a-|b-a|c-a"}), Encoding.UTF8,
+        "application/json");
+      await httpClient.PostAsync("http://localhost:55070/api/test", postData);
+      postData = new StringContent(JsonConvert.SerializeObject(new {Jobs = "a-|b-a"}), Encoding.UTF8, "application/json");
+      await httpClient.PostAsync("http://localhost:55070/api/test", postData);
 
-      Assert.That(results, Is.EqualTo(expectedResults));
+      var response =
+        await httpClient.GetAsync("http://localhost:55070/api/test?url=http://localhost:55070/api/orderedJobs");
+      var result = await response.Content.ReadAsStringAsync();
+      var testResult = JsonConvert.DeserializeObject<TestResult>(result);
+
+      Assert.That(testResult, Is.EqualTo(expectedTestResult));
     }
   }
 }
