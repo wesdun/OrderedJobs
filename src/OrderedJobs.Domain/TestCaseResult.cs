@@ -1,13 +1,14 @@
 ﻿using System;
+using OrderedJobs.Data.Models;
 
 namespace OrderedJobs.Domain
 {
   public class TestCaseResult : IEquatable<TestCaseResult>
   {
-    public string TestCase { get; }
+    public TestCase TestCase { get; }
     public string Result { get; }
 
-    public TestCaseResult(string testCase, string result)
+    public TestCaseResult(TestCase testCase, string result)
     {
       TestCase = testCase;
       Result = result;

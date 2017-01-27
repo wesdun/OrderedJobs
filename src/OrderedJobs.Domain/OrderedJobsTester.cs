@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using OrderedJobs.Data.Models;
 
 namespace OrderedJobs.Domain
 {
@@ -13,14 +14,14 @@ namespace OrderedJobs.Domain
       this._orderedJobsCaller = _orderedJobsCaller;
     }
 
-    public async Task<TestCaseResult> Verify(string url, string testCase)
+    public async Task<TestCaseResult> Verify(string url, TestCase testCase)
     {
       var jobOrderer = new JobOrderer();
-      var expectedOrdererJobs = jobOrderer.Order(testCase);
-      var orderedJobs = await _orderedJobsCaller.GetOrderedJobs(url, testCase);
+      var expectedOrdererJobs = jobOrderer.Order(testCase.Jobs);
+      var orderedJobs = await _orderedJobsCaller.GetOrderedJobs(url, testCase.Jobs);
       if (expectedOrdererJobs.Contains("ERROR"))
         return new TestCaseResult(testCase, VerifyError(orderedJobs, expectedOrdererJobs));
-      var jobs = CreateJobs(testCase);
+      var jobs = CreateJobs(testCase.Jobs);
       var jobCountResult = VerifyJobCount(orderedJobs, jobs);
       return jobCountResult.Contains("FAIL")
         ? new TestCaseResult(testCase, jobCountResult)
@@ -59,11 +60,11 @@ namespace OrderedJobs.Domain
       return jobsData.Split('|').Select(jobData => new Job(jobData));
     }
 
-    public string[] GetTestCasePermutations(string testCase)
+    public TestCase[] GetTestCasePermutations(TestCase testCase)
     {
-      var jobs = CreateJobs(testCase).ToArray();
+      var jobs = CreateJobs(testCase.Jobs).ToArray();
       return GetPermutations(jobs)
-        .Select(permutation => string.Join("|", permutation))
+        .Select(permutation => new TestCase(string.Join("|", permutation)))
         .ToArray();
     }
 
@@ -75,7 +76,7 @@ namespace OrderedJobs.Domain
         (job, permutation) => new List<Job> {job}.Concat(permutation));
     }
 
-    public TestCasePermutationsResult VerifyAllPermutations(string url, string testCase)
+    public TestCasePermutationsResult VerifyAllPermutations(string url, TestCase testCase)
     {
       var testCasePermutationsResult = new TestCasePermutationsResult(testCase);
       var testCasePermutations = GetTestCasePermutations(testCase);
@@ -89,7 +90,7 @@ namespace OrderedJobs.Domain
       return testCasePermutationsResult;
     }
 
-    public TestResult VerifyAllTestCases(string url, string[] testCases)
+    public TestResult VerifyAllTestCases(string url, TestCase[] testCases)
     {
       var testResult = new TestResult
       {

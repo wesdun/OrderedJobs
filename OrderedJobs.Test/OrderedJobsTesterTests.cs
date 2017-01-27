@@ -1,5 +1,6 @@
 ﻿using Moq;
 using NUnit.Framework;
+using OrderedJobs.Data.Models;
 using OrderedJobs.Domain;
 
 namespace OrderedJobs.Test
@@ -23,7 +24,7 @@ namespace OrderedJobs.Test
       orderedJobsCallerMock.Setup(orderedJobsTester => orderedJobsTester.GetOrderedJobs(It.IsAny<string>(), "a-|b-|c-"))
         .ReturnsAsync("abc");
       _orderedJobsTester = new OrderedJobsTester(orderedJobsCallerMock.Object);
-      Assert.That(_orderedJobsTester.Verify("", "a-|b-|c-").Result.Result, Is.EqualTo("PASS"));
+      Assert.That(_orderedJobsTester.Verify("", new TestCase("a-|b-|c-")).Result.Result, Is.EqualTo("PASS"));
     }
 
     [Test]
@@ -33,7 +34,7 @@ namespace OrderedJobs.Test
       orderedJobsCallerMock.Setup(orderedJobsTester => orderedJobsTester.GetOrderedJobs(It.IsAny<string>(), "a-|b-|c-"))
         .ReturnsAsync("ab");
       _orderedJobsTester = new OrderedJobsTester(orderedJobsCallerMock.Object);
-      Assert.That(_orderedJobsTester.Verify("", "a-|b-|c-").Result.Result, Is.EqualTo("FAIL: jobs must be added once"));
+      Assert.That(_orderedJobsTester.Verify("", new TestCase("a-|b-|c-")).Result.Result, Is.EqualTo("FAIL: jobs must be added once"));
     }
 
     [Test]
@@ -43,7 +44,7 @@ namespace OrderedJobs.Test
       orderedJobsCallerMock.Setup(orderedJobsTester => orderedJobsTester.GetOrderedJobs(It.IsAny<string>(), "a-|b-|c-"))
         .ReturnsAsync("abbc");
       _orderedJobsTester = new OrderedJobsTester(orderedJobsCallerMock.Object);
-      Assert.That(_orderedJobsTester.Verify("", "a-|b-|c-").Result.Result, Is.EqualTo("FAIL: jobs must be added once"));
+      Assert.That(_orderedJobsTester.Verify("", new TestCase("a-|b-|c-")).Result.Result, Is.EqualTo("FAIL: jobs must be added once"));
     }
 
     [Test]
@@ -54,7 +55,7 @@ namespace OrderedJobs.Test
           orderedJobsTester => orderedJobsTester.GetOrderedJobs(It.IsAny<string>(), "a-b|b-|c-a"))
         .ReturnsAsync("bac");
       _orderedJobsTester = new OrderedJobsTester(orderedJobsCallerMock.Object);
-      Assert.That(_orderedJobsTester.Verify("", "a-b|b-|c-a").Result.Result, Is.EqualTo("PASS"));
+      Assert.That(_orderedJobsTester.Verify("", new TestCase("a-b|b-|c-a")).Result.Result, Is.EqualTo("PASS"));
     }
 
     [Test]
@@ -65,33 +66,22 @@ namespace OrderedJobs.Test
           orderedJobsTester => orderedJobsTester.GetOrderedJobs(It.IsAny<string>(), "a-b|b-|c-a"))
         .ReturnsAsync("bca");
       _orderedJobsTester = new OrderedJobsTester(orderedJobsCallerMock.Object);
-      Assert.That(_orderedJobsTester.Verify("", "a-b|b-|c-a").Result.Result, Is.EqualTo("FAIL: expected a before c"));
+      Assert.That(_orderedJobsTester.Verify("", new TestCase("a-b|b-|c-a")).Result.Result, Is.EqualTo("FAIL: expected a before c"));
     }
 
     [Test]
-    public void TwoTestCasePermutationsTest()
+    public void GetTestCasePermutationsTest()
     {
       var expectedPermutations = new[]
       {
-        "a-|b-",
-        "b-|a-"
+        new TestCase("a-|b-|c-"),
+        new TestCase("a-|c-|b-"),
+        new TestCase("b-|a-|c-"),
+        new TestCase("b-|c-|a-"),
+        new TestCase("c-|a-|b-"),
+        new TestCase("c-|b-|a-")
       };
-      Assert.That(_orderedJobsTester.GetTestCasePermutations("a-|b-"), Is.EquivalentTo(expectedPermutations));
-    }
-
-    [Test]
-    public void TestCasePermutationsTest()
-    {
-      var expectedPermutations = new[]
-      {
-        "a-|b-|c-",
-        "a-|c-|b-",
-        "b-|a-|c-",
-        "b-|c-|a-",
-        "c-|a-|b-",
-        "c-|b-|a-"
-      };
-      Assert.That(_orderedJobsTester.GetTestCasePermutations("a-|b-|c-"), Is.EquivalentTo(expectedPermutations));
+      Assert.That(_orderedJobsTester.GetTestCasePermutations(new TestCase("a-|b-|c-")), Is.EquivalentTo(expectedPermutations));
     }
 
     [Test]
@@ -102,7 +92,7 @@ namespace OrderedJobs.Test
           orderedJobsTester => orderedJobsTester.GetOrderedJobs(It.IsAny<string>(), "a-b|b-b|c-a"))
         .ReturnsAsync("ERROR: Jobs can't depend on themselves");
       _orderedJobsTester = new OrderedJobsTester(orderedJobsCallerMock.Object);
-      Assert.That(_orderedJobsTester.Verify("", "a-b|b-b|c-a").Result.Result, Is.EqualTo("PASS"));
+      Assert.That(_orderedJobsTester.Verify("", new TestCase("a-b|b-b|c-a")).Result.Result, Is.EqualTo("PASS"));
     }
 
     [Test]
@@ -113,7 +103,7 @@ namespace OrderedJobs.Test
           orderedJobsTester => orderedJobsTester.GetOrderedJobs(It.IsAny<string>(), "a-b|b-b|c-a"))
         .ReturnsAsync("bac");
       _orderedJobsTester = new OrderedJobsTester(orderedJobsCallerMock.Object);
-      Assert.That(_orderedJobsTester.Verify("", "a-b|b-b|c-a").Result.Result, Is.EqualTo("FAIL: expected ERROR: Jobs can't depend on themselves"));
+      Assert.That(_orderedJobsTester.Verify("", new TestCase("a-b|b-b|c-a")).Result.Result, Is.EqualTo("FAIL: expected ERROR: Jobs can't depend on themselves"));
     }
 
     [Test]
@@ -124,7 +114,7 @@ namespace OrderedJobs.Test
           orderedJobsTester => orderedJobsTester.GetOrderedJobs(It.IsAny<string>(), "a-|b-c|c-f|d-a|e-|f-b"))
         .ReturnsAsync("ERROR: Jobs can't have circular dependency");
       _orderedJobsTester = new OrderedJobsTester(orderedJobsCallerMock.Object);
-      Assert.That(_orderedJobsTester.Verify("", "a-|b-c|c-f|d-a|e-|f-b").Result.Result,
+      Assert.That(_orderedJobsTester.Verify("", new TestCase("a-|b-c|c-f|d-a|e-|f-b")).Result.Result,
         Is.EqualTo("PASS"));
     }
 
@@ -136,7 +126,7 @@ namespace OrderedJobs.Test
           orderedJobsTester => orderedJobsTester.GetOrderedJobs(It.IsAny<string>(), "a-|b-c|c-f|d-a|e-|f-b"))
         .ReturnsAsync("acbdef");
       _orderedJobsTester = new OrderedJobsTester(orderedJobsCallerMock.Object);
-      Assert.That(_orderedJobsTester.Verify("", "a-|b-c|c-f|d-a|e-|f-b").Result.Result,
+      Assert.That(_orderedJobsTester.Verify("", new TestCase("a-|b-c|c-f|d-a|e-|f-b")).Result.Result,
         Is.EqualTo("FAIL: expected ERROR: Jobs can't have circular dependency"));
     }
 
@@ -149,7 +139,7 @@ namespace OrderedJobs.Test
       orderedJobsCallerMock.Setup(orderedJobsTester => orderedJobsTester.GetOrderedJobs(It.IsAny<string>(), "b-|a-"))
         .ReturnsAsync("ab");
       _orderedJobsTester = new OrderedJobsTester(orderedJobsCallerMock.Object);
-      Assert.That(_orderedJobsTester.VerifyAllPermutations("", "a-|b-").Result, Is.EqualTo("PASS"));
+      Assert.That(_orderedJobsTester.VerifyAllPermutations("", new TestCase("a-|b-")).Result, Is.EqualTo("PASS"));
     }
 
     [Test]
@@ -164,7 +154,7 @@ namespace OrderedJobs.Test
         .ReturnsAsync("ab");
       _orderedJobsTester = new OrderedJobsTester(orderedJobsCallerMock.Object);
 
-      Assert.That(_orderedJobsTester.VerifyAllTestCases("", new[] {"a-", "a-|b-"}).Result,
+      Assert.That(_orderedJobsTester.VerifyAllTestCases("", new[] {new TestCase("a-"), new TestCase("a-|b-"), }).Result,
         Is.EqualTo("PASS"));
     }
   }
