@@ -33,7 +33,7 @@ namespace OrderedJobs.Test
       orderedJobsCallerMock.Setup(orderedJobsTester => orderedJobsTester.GetOrderedJobs(It.IsAny<string>(), "a-|b-|c-"))
         .ReturnsAsync("ab");
       _orderedJobsTester = new OrderedJobsTester(orderedJobsCallerMock.Object);
-      Assert.That(_orderedJobsTester.Verify("", "a-|b-|c-").Result.Result, Is.EqualTo("FAIL"));
+      Assert.That(_orderedJobsTester.Verify("", "a-|b-|c-").Result.Result, Is.EqualTo("FAIL: jobs must be added once"));
     }
 
     [Test]
@@ -43,7 +43,7 @@ namespace OrderedJobs.Test
       orderedJobsCallerMock.Setup(orderedJobsTester => orderedJobsTester.GetOrderedJobs(It.IsAny<string>(), "a-|b-|c-"))
         .ReturnsAsync("abbc");
       _orderedJobsTester = new OrderedJobsTester(orderedJobsCallerMock.Object);
-      Assert.That(_orderedJobsTester.Verify("", "a-|b-|c-").Result.Result, Is.EqualTo("FAIL"));
+      Assert.That(_orderedJobsTester.Verify("", "a-|b-|c-").Result.Result, Is.EqualTo("FAIL: jobs must be added once"));
     }
 
     [Test]
@@ -65,7 +65,7 @@ namespace OrderedJobs.Test
           orderedJobsTester => orderedJobsTester.GetOrderedJobs(It.IsAny<string>(), "a-b|b-|c-a"))
         .ReturnsAsync("bca");
       _orderedJobsTester = new OrderedJobsTester(orderedJobsCallerMock.Object);
-      Assert.That(_orderedJobsTester.Verify("", "a-b|b-|c-a").Result.Result, Is.EqualTo("FAIL"));
+      Assert.That(_orderedJobsTester.Verify("", "a-b|b-|c-a").Result.Result, Is.EqualTo("FAIL: expected a before c"));
     }
 
     [Test]
@@ -100,9 +100,20 @@ namespace OrderedJobs.Test
       var orderedJobsCallerMock = new Mock<OrderedJobsCaller>();
       orderedJobsCallerMock.Setup(
           orderedJobsTester => orderedJobsTester.GetOrderedJobs(It.IsAny<string>(), "a-b|b-b|c-a"))
-        .ReturnsAsync("ERROR: Jobs can't be self referencing.");
+        .ReturnsAsync("ERROR: Jobs can't depend on themselves");
       _orderedJobsTester = new OrderedJobsTester(orderedJobsCallerMock.Object);
       Assert.That(_orderedJobsTester.Verify("", "a-b|b-b|c-a").Result.Result, Is.EqualTo("PASS"));
+    }
+
+    [Test]
+    public void VerifySelfReferencingErrorFail()
+    {
+      var orderedJobsCallerMock = new Mock<OrderedJobsCaller>();
+      orderedJobsCallerMock.Setup(
+          orderedJobsTester => orderedJobsTester.GetOrderedJobs(It.IsAny<string>(), "a-b|b-b|c-a"))
+        .ReturnsAsync("bac");
+      _orderedJobsTester = new OrderedJobsTester(orderedJobsCallerMock.Object);
+      Assert.That(_orderedJobsTester.Verify("", "a-b|b-b|c-a").Result.Result, Is.EqualTo("FAIL: expected ERROR: Jobs can't depend on themselves"));
     }
 
     [Test]
@@ -111,10 +122,22 @@ namespace OrderedJobs.Test
       var orderedJobsCallerMock = new Mock<OrderedJobsCaller>();
       orderedJobsCallerMock.Setup(
           orderedJobsTester => orderedJobsTester.GetOrderedJobs(It.IsAny<string>(), "a-|b-c|c-f|d-a|e-|f-b"))
-        .ReturnsAsync("ERROR: Jobs can't depend on themselves.");
+        .ReturnsAsync("ERROR: Jobs can't have circular dependency");
       _orderedJobsTester = new OrderedJobsTester(orderedJobsCallerMock.Object);
       Assert.That(_orderedJobsTester.Verify("", "a-|b-c|c-f|d-a|e-|f-b").Result.Result,
         Is.EqualTo("PASS"));
+    }
+
+    [Test]
+    public void VerifyCircularDependencyErrorFail()
+    {
+      var orderedJobsCallerMock = new Mock<OrderedJobsCaller>();
+      orderedJobsCallerMock.Setup(
+          orderedJobsTester => orderedJobsTester.GetOrderedJobs(It.IsAny<string>(), "a-|b-c|c-f|d-a|e-|f-b"))
+        .ReturnsAsync("acbdef");
+      _orderedJobsTester = new OrderedJobsTester(orderedJobsCallerMock.Object);
+      Assert.That(_orderedJobsTester.Verify("", "a-|b-c|c-f|d-a|e-|f-b").Result.Result,
+        Is.EqualTo("FAIL: expected ERROR: Jobs can't have circular dependency"));
     }
 
     [Test]

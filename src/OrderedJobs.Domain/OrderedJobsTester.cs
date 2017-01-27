@@ -21,16 +21,24 @@ namespace OrderedJobs.Domain
       if (expectedOrdererJobs.Contains("ERROR"))
         return new TestCaseResult(testCase, VerifyError(orderedJobs, expectedOrdererJobs));
       var jobs = CreateJobs(testCase);
-      return new TestCaseResult(testCase, VerifyJobCountAndDependecyOrder(orderedJobs, jobs));
+      var jobCountResult = VerifyJobCount(orderedJobs, jobs);
+      return jobCountResult.Contains("FAIL")
+        ? new TestCaseResult(testCase, jobCountResult)
+        : new TestCaseResult(testCase, VerifyDependecyOrder(orderedJobs, jobs));
     }
 
-    private static string VerifyJobCountAndDependecyOrder(string orderedJobs, IEnumerable<Job> jobs)
+    public string VerifyJobCount(string orderedJobs, IEnumerable<Job> jobs)
     {
-      return (from job in jobs
-        let occurrencesOfJob = orderedJobs.Count(orderedJob => orderedJob.ToString() == job.Name)
-        where occurrencesOfJob != 1 || IsJobBeforeDependency(orderedJobs, job)
-        select job).Any()
-        ? "FAIL"
+      return jobs.Any(job => orderedJobs.Count(ordedJob => ordedJob.ToString() == job.Name) != 1)
+        ? "FAIL: jobs must be added once"
+        : "PASS";
+    }
+
+    private string VerifyDependecyOrder(string orderedJobs, IEnumerable<Job> jobs)
+    {
+      var jobsOutOfOrder = jobs.Where(job => IsJobBeforeDependency(orderedJobs, job)).ToArray();
+      return jobsOutOfOrder.Any()
+        ? "FAIL: expected " + jobsOutOfOrder[0].Dependency + " before " + jobsOutOfOrder[0].Name
         : "PASS";
     }
 
@@ -38,7 +46,7 @@ namespace OrderedJobs.Domain
     {
       return orderedJobs == expectedOrdererJobs
         ? "PASS"
-        : "FAIL";
+        : "FAIL: expected " + expectedOrdererJobs;
     }
 
     private static bool IsJobBeforeDependency(string orderedJobs, Job job)
