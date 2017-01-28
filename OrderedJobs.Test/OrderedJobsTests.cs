@@ -71,5 +71,11 @@ namespace OrderedJobs.Test
     {
       Assert.That(_jobOrderer.Order("a-|b-c|c-f|d-a|e-|f-b"), Is.EqualTo("ERROR: Jobs can't have circular dependency"));
     }
+
+    [Test]
+    public void MultipleJobsTest()
+    {
+      Assert.That(_jobOrderer.Order("a-|a-b"), Is.EqualTo("ERROR: Can only have one instance of a job"));
+    }
   }
 }

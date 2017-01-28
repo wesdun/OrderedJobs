@@ -11,7 +11,9 @@ namespace OrderedJobs.Domain
       if (jobsData.Length == 0) return "";
 
       var jobs = CreateJobs(jobsData).ToList();
-      if (jobs.Any(job => job.Name == job.Dependency)) return "ERROR: Jobs can't depend on themselves";
+      if (HasASelfReferencingJob(jobs)) return "ERROR: Jobs can't depend on themselves";
+      if (HasMultiplesOfAJob(jobs))
+        return "ERROR: Can only have one instance of a job";
       var orderedJobs = AddJobsWithNoDependencies(jobs);
       var jobsToAdd = GetJobsToAdd(jobs, orderedJobs);
       var numberOfJobsToAdd = jobsToAdd.Count;
@@ -26,6 +28,16 @@ namespace OrderedJobs.Domain
       return orderedJobs;
     }
 
+    private static bool HasASelfReferencingJob(List<Job> jobs)
+    {
+      return jobs.Any(job => job.Name == job.Dependency);
+    }
+
+    private static bool HasMultiplesOfAJob(List<Job> jobs)
+    {
+      return jobs.Select(job => job.Name).Distinct().Count() != jobs.Count;
+    }
+
     private static IEnumerable<Job> CreateJobs(string jobsData)
     {
       return jobsData.Split('|').Select(jobData => new Job(jobData));
@@ -36,19 +48,19 @@ namespace OrderedJobs.Domain
       return numberOfJobsToAdd == jobsToAdd.Count;
     }
 
-    private static string AddJobsWhereDependencyHasBeenOrdered(IEnumerable<Job> jobsToAdd, string orderedJobs)
+    private static string AddJobsWhereDependencyHasBeenOrdered(List<Job> jobsToAdd, string orderedJobs)
     {
       return jobsToAdd
         .Where(jobToAdd => orderedJobs.Contains(jobToAdd.Dependency))
         .Aggregate(orderedJobs, (current, job) => current + job.Name);
     }
 
-    private static List<Job> GetJobsToAdd(IEnumerable<Job> jobs, string orderedJobs)
+    private static List<Job> GetJobsToAdd(List<Job> jobs, string orderedJobs)
     {
       return jobs.Where(job => !orderedJobs.Contains(job.Name)).ToList();
     }
 
-    private static string AddJobsWithNoDependencies(IEnumerable<Job> splitJobs)
+    private static string AddJobsWithNoDependencies(List<Job> splitJobs)
     {
       return splitJobs
         .Where(job => !job.HasDependency())
