@@ -13,7 +13,7 @@ namespace OrderedJobs.Test
 
     public void InitOrderJobTester(OrderedJobsResult[] orderedJobsResults)
     {
-      var orderedJobsCallerMock = new Mock<OrderedJobsCaller>();
+      var orderedJobsCallerMock = new Mock<IOrderedJobsCaller>();
 
       foreach (var orderedJobsResult in orderedJobsResults)
         orderedJobsCallerMock.Setup(

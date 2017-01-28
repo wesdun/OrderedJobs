@@ -7,9 +7,9 @@ namespace OrderedJobs.Domain
 {
   public class OrderedJobsTester
   {
-    private readonly OrderedJobsCaller _orderedJobsCaller;
+    private readonly IOrderedJobsCaller _orderedJobsCaller;
 
-    public OrderedJobsTester(OrderedJobsCaller orderedJobsCaller)
+    public OrderedJobsTester(IOrderedJobsCaller orderedJobsCaller)
     {
       _orderedJobsCaller = orderedJobsCaller;
     }
@@ -28,7 +28,7 @@ namespace OrderedJobs.Domain
         : new TestCaseResult(testCase.ToString(), VerifyDependecyOrder(orderedJobs, jobs));
     }
 
-    public string VerifyJobCount(string orderedJobs, IEnumerable<Job> jobs)
+    private string VerifyJobCount(string orderedJobs, IEnumerable<Job> jobs)
     {
       return jobs.Any(job => orderedJobs.Count(ordedJob => ordedJob.ToString() == job.Name) != 1)
         ? "FAIL: jobs must be added once"
@@ -67,7 +67,7 @@ namespace OrderedJobs.Domain
         .ToArray();
     }
 
-    public IEnumerable<IEnumerable<Job>> GetPermutations(IEnumerable<Job> jobs)
+    private IEnumerable<IEnumerable<Job>> GetPermutations(IEnumerable<Job> jobs)
     {
       if (jobs.Count() == 1) return jobs.Select(job => new[] {job});
 

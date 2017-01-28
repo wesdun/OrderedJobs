@@ -31,7 +31,7 @@ namespace OrderedJobs
 
       services.AddSingleton<JobOrderer, JobOrderer>();
       services.AddSingleton<DatabaseGateway, DatabaseGateway>();
-      services.AddSingleton<OrderedJobsCaller, OrderedJobsCaller>();
+      services.AddSingleton<IOrderedJobsCaller, OrderedJobsCaller>();
       services.AddSingleton<OrderedJobsTester, OrderedJobsTester>();
     }
 
