@@ -18,14 +18,15 @@ namespace OrderedJobs.Data.Models
     {
       if (ReferenceEquals(null, other)) return false;
       if (ReferenceEquals(this, other)) return true;
-      return string.Equals(TestCase, other.TestCase) && string.Equals(Result, other.Result) && Results.SequenceEqual(other.Results);
+      return string.Equals(TestCase, other.TestCase) && string.Equals(Result, other.Result) &&
+             Results.SequenceEqual(other.Results);
     }
 
     public override bool Equals(object obj)
     {
       if (ReferenceEquals(null, obj)) return false;
       if (ReferenceEquals(this, obj)) return true;
-      return obj.GetType() == this.GetType() && Equals((TestCasePermutationsResult) obj);
+      return obj.GetType() == GetType() && Equals((TestCasePermutationsResult) obj);
     }
 
     public override int GetHashCode()

@@ -20,7 +20,7 @@ namespace OrderedJobs.Data.Models
     {
       if (ReferenceEquals(null, obj)) return false;
       if (ReferenceEquals(this, obj)) return true;
-      return obj.GetType() == this.GetType() && Equals((TestResult) obj);
+      return obj.GetType() == GetType() && Equals((TestResult) obj);
     }
 
     public override int GetHashCode()

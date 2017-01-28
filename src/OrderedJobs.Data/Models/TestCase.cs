@@ -1,18 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace OrderedJobs.Data.Models
 {
-
   public class TestCase : IEquatable<TestCase>
   {
     [BsonRepresentation(BsonType.ObjectId)]
     public string Id { get; set; }
 
-    
+
     public Job[] Jobs { get; set; }
 
     public TestCase(string jobs)
