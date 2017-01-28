@@ -10,10 +10,10 @@ namespace OrderedJobs.Controllers
   [Route("api/[controller]")]
   public class TestController : Controller
   {
-    private readonly DatabaseGateway _dbGateway;
+    private readonly IDatabaseGateway<TestCase> _dbGateway;
     private readonly OrderedJobsTester _orderedJobsTester;
 
-    public TestController(DatabaseGateway dbGateway, OrderedJobsTester orderedJobsTester)
+    public TestController(IDatabaseGateway<TestCase> dbGateway, OrderedJobsTester orderedJobsTester)
     {
       _dbGateway = dbGateway;
       _orderedJobsTester = orderedJobsTester;
@@ -22,26 +22,26 @@ namespace OrderedJobs.Controllers
     [HttpGet]
     public async Task<TestResult> Get(string url)
     {
-      var testCases = await _dbGateway.GetAllTestCases();
+      var testCases = await _dbGateway.GetAll();
       return _orderedJobsTester.VerifyAllTestCases(url, testCases.ToArray());
     }
 
     [HttpPost]
     public void Post([FromBody] string testCase)
     {
-      _dbGateway.AddTestCase(new TestCase(testCase));
+      _dbGateway.Add(new TestCase(testCase));
     }
 
     [HttpDelete]
     public void Delete()
     {
-      _dbGateway.DeleteAllTestCases();
+      _dbGateway.DeleteAll();
     }
 
     [HttpDelete("{jobs}")]
     public void Delete(string jobs)
     {
-      _dbGateway.DeleteTestCase(new TestCase(jobs));
+      _dbGateway.Delete(new TestCase(jobs));
     }
   }
 }

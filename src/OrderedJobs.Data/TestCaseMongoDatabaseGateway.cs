@@ -7,11 +7,11 @@ using OrderedJobs.Data.Models;
 
 namespace OrderedJobs.Data
 {
-  public class DatabaseGateway
+  public class TestCaseMongoDatabaseGateway : IDatabaseGateway<TestCase>
   {
     private readonly IMongoCollection<TestCase> _collection;
 
-    public DatabaseGateway()
+    public TestCaseMongoDatabaseGateway()
     {
       BsonClassMap.RegisterClassMap<TestCase>(cm => cm.MapMember(c => c.Jobs).SetSerializer(new TestCaseSerializer()));
       const string connectionString = "mongodb://localhost:27017";
@@ -21,7 +21,7 @@ namespace OrderedJobs.Data
       _collection.Indexes.CreateOneAsync(new BsonDocument("Jobs", 1), new CreateIndexOptions {Unique = true});
     }
 
-    public async void AddTestCase(TestCase testCase)
+    public async void Add(TestCase testCase)
     {
       try
       {
@@ -32,17 +32,17 @@ namespace OrderedJobs.Data
       }
     }
 
-    public async void DeleteAllTestCases()
+    public async void DeleteAll()
     {
       await _collection.DeleteManyAsync(FilterDefinition<TestCase>.Empty);
     }
 
-    public async void DeleteTestCase(TestCase testCase)
+    public async void Delete(TestCase testCase)
     {
       await _collection.DeleteOneAsync(x => x.Jobs == testCase.Jobs);
     }
 
-    public async Task<IEnumerable<TestCase>> GetAllTestCases()
+    public async Task<IEnumerable<TestCase>> GetAll()
     {
       return await _collection.Find(Builders<TestCase>.Filter.Empty).ToListAsync();
     }

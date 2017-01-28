@@ -1,10 +1,10 @@
-﻿using System.Net.Http;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OrderedJobs.Data;
+using OrderedJobs.Data.Models;
 using OrderedJobs.Domain;
 
 namespace OrderedJobs
@@ -30,7 +30,7 @@ namespace OrderedJobs
       services.AddMvc();
 
       services.AddSingleton<JobOrderer, JobOrderer>();
-      services.AddSingleton<DatabaseGateway, DatabaseGateway>();
+      services.AddSingleton<IDatabaseGateway<TestCase>, TestCaseMongoDatabaseGateway>();
       services.AddSingleton<IOrderedJobsCaller, OrderedJobsCaller>();
       services.AddSingleton<OrderedJobsTester, OrderedJobsTester>();
     }
