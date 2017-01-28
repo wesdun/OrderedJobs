@@ -1,7 +1,6 @@
 ﻿using System;
-using OrderedJobs.Data.Models;
 
-namespace OrderedJobs.Domain
+namespace OrderedJobs.Data.Models
 {
   public class TestCaseResult : IEquatable<TestCaseResult>
   {

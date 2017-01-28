@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using OrderedJobs.Data;
+using OrderedJobs.Data.Models;
 
 namespace OrderedJobs.Domain
 {
@@ -33,7 +33,7 @@ namespace OrderedJobs.Domain
 
     private static bool HasCircularDependency(int numberOfJobsToAdd, List<Job> jobsToAdd)
     {
-      return (numberOfJobsToAdd == jobsToAdd.Count);
+      return numberOfJobsToAdd == jobsToAdd.Count;
     }
 
     private static string AddJobsWhereDependencyHasBeenOrdered(IEnumerable<Job> jobsToAdd, string orderedJobs)

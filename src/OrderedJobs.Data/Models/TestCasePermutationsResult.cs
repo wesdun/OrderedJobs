@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Linq;
-using OrderedJobs.Data.Models;
 
-namespace OrderedJobs.Domain
+namespace OrderedJobs.Data.Models
 {
   public class TestCasePermutationsResult : IEquatable<TestCasePermutationsResult>
   {

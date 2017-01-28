@@ -3,6 +3,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using NUnit.Framework;
+using OrderedJobs.Data.Models;
 using OrderedJobs.Domain;
 
 namespace OrderedJobs.Acceptance.Test

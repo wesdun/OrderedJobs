@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace OrderedJobs.Domain
+namespace OrderedJobs.Data.Models
 {
   public class TestResult : IEquatable<TestResult>
   {

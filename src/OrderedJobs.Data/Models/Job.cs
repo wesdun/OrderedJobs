@@ -1,6 +1,6 @@
 using System;
 
-namespace OrderedJobs.Data
+namespace OrderedJobs.Data.Models
 {
   public class Job : IEquatable<Job>
   {
