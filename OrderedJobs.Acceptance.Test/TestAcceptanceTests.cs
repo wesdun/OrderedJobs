@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using NUnit.Framework;
 using OrderedJobs.Data.Models;
-using OrderedJobs.Domain;
 
 namespace OrderedJobs.Acceptance.Test
 {
@@ -12,7 +11,7 @@ namespace OrderedJobs.Acceptance.Test
   public class TestAcceptanceTests
   {
     [Test]
-    public async Task OrderOneJobTest()
+    public async Task OrderJobsTesterAcceptanceTest()
     {
       var httpClient = new HttpClient();
       var expectedTestResult = new TestResult

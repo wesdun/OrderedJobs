@@ -1,7 +1,7 @@
 ﻿using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
 using NUnit.Framework;
-using OrderedJobs.Controllers;
-using OrderedJobs.Domain;
 
 namespace OrderedJobs.Acceptance.Test
 {
@@ -9,10 +9,11 @@ namespace OrderedJobs.Acceptance.Test
   public class OrderedJobsAcceptanceTests
   {
     [Test]
-    public void GetOrderedJobsAreInOrderTest()
+    public async Task OrdersJobsAcceptanceTest()
     {
-      var orderedJobsController = new OrderedJobsController(new JobOrderer());
-      var orderedJobs = orderedJobsController.Get("a-|b-c|c-f|d-a|e-b|f-");
+      var httpClient = new HttpClient();
+      var response = await httpClient.GetAsync("http://localhost:55070/api/OrderedJobs/a-|b-c|c-f|d-a|e-b|f-");
+      var orderedJobs = await response.Content.ReadAsStringAsync();
       var indexOfA = orderedJobs.IndexOf("a");
       var indexOfB = orderedJobs.IndexOf("b");
       var indexOfC = orderedJobs.IndexOf("c");
@@ -23,13 +24,6 @@ namespace OrderedJobs.Acceptance.Test
       Assert.That(indexOfC, Is.GreaterThan(indexOfF));
       Assert.That(indexOfD, Is.GreaterThan(indexOfA));
       Assert.That(indexOfE, Is.GreaterThan(indexOfB));
-    }
-
-    [Test]
-    public void GetOrderedJobsHasOneOfEachJobTest()
-    {
-      var orderedJobsController = new OrderedJobsController(new JobOrderer());
-      var orderedJobs = orderedJobsController.Get("a-|b-c|c-f|d-a|e-b|f-");
       Assert.That(orderedJobs.Length, Is.EqualTo(orderedJobs.ToCharArray().Distinct().Count()));
     }
   }
