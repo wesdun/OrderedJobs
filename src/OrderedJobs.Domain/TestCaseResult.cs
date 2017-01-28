@@ -5,10 +5,10 @@ namespace OrderedJobs.Domain
 {
   public class TestCaseResult : IEquatable<TestCaseResult>
   {
-    public TestCase TestCase { get; }
+    public string TestCase { get; }
     public string Result { get; }
 
-    public TestCaseResult(TestCase testCase, string result)
+    public TestCaseResult(string testCase, string result)
     {
       TestCase = testCase;
       Result = result;

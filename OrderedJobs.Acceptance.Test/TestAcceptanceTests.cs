@@ -44,11 +44,10 @@ namespace OrderedJobs.Acceptance.Test
         }
       };
       await httpClient.DeleteAsync("http://localhost:55070/api/test");
-      var postData = new StringContent(JsonConvert.SerializeObject(new {Jobs = "a-|b-a|c-a"}), Encoding.UTF8,
-        "application/json");
-      await httpClient.PostAsync("http://localhost:55070/api/test", postData);
-      postData = new StringContent(JsonConvert.SerializeObject(new {Jobs = "a-|b-a"}), Encoding.UTF8, "application/json");
-      await httpClient.PostAsync("http://localhost:55070/api/test", postData);
+      await httpClient.PostAsync("http://localhost:55070/api/test",
+        new StringContent(JsonConvert.SerializeObject("a-|b-a|c-a"), Encoding.UTF8, "application/json"));
+      await httpClient.PostAsync("http://localhost:55070/api/test",
+        new StringContent(JsonConvert.SerializeObject("a-|b-a"), Encoding.UTF8, "application/json"));
 
       var response =
         await httpClient.GetAsync("http://localhost:55070/api/test?url=http://localhost:55070/api/orderedJobs");

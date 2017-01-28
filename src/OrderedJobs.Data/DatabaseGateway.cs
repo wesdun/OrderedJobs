@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using OrderedJobs.Data.Models;
 
@@ -12,6 +13,7 @@ namespace OrderedJobs.Data
 
     public DatabaseGateway()
     {
+      BsonClassMap.RegisterClassMap<TestCase>(cm => cm.MapMember(c => c.Jobs).SetSerializer(new TestCaseSerializer()));
       const string connectionString = "mongodb://localhost:27017";
       var mongoClient = new MongoClient(connectionString);
       var db = mongoClient.GetDatabase("OrderedJobs");

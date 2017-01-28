@@ -23,14 +23,13 @@ namespace OrderedJobs.Controllers
     public async Task<TestResult> Get(string url)
     {
       var testCases = await _dbGateway.GetAllTestCases();
-      var testCaseStrings = testCases.Select(testCase => testCase.Jobs).ToArray();
-      return _orderedJobsTester.VerifyAllTestCases(url, testCaseStrings);
+      return _orderedJobsTester.VerifyAllTestCases(url, testCases.ToArray());
     }
 
     [HttpPost]
-    public void Post([FromBody] TestCase testCase)
+    public void Post([FromBody] string testCase)
     {
-      _dbGateway.AddTestCase(testCase);
+      _dbGateway.AddTestCase(new TestCase(testCase));
     }
 
     [HttpDelete]

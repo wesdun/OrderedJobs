@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using OrderedJobs.Data;
 using OrderedJobs.Data.Models;
 
 namespace OrderedJobs.Domain
@@ -17,15 +18,15 @@ namespace OrderedJobs.Domain
     public async Task<TestCaseResult> Verify(string url, TestCase testCase)
     {
       var jobOrderer = new JobOrderer();
-      var expectedOrdererJobs = jobOrderer.Order(testCase.Jobs);
-      var orderedJobs = await _orderedJobsCaller.GetOrderedJobs(url, testCase.Jobs);
+      var expectedOrdererJobs = jobOrderer.Order(testCase.ToString());
+      var orderedJobs = await _orderedJobsCaller.GetOrderedJobs(url, testCase.ToString());
       if (expectedOrdererJobs.Contains("ERROR"))
-        return new TestCaseResult(testCase, VerifyError(orderedJobs, expectedOrdererJobs));
-      var jobs = CreateJobs(testCase.Jobs);
+        return new TestCaseResult(testCase.ToString(), VerifyError(orderedJobs, expectedOrdererJobs));
+      var jobs = CreateJobs(testCase.ToString());
       var jobCountResult = VerifyJobCount(orderedJobs, jobs);
       return jobCountResult.Contains("FAIL")
-        ? new TestCaseResult(testCase, jobCountResult)
-        : new TestCaseResult(testCase, VerifyDependecyOrder(orderedJobs, jobs));
+        ? new TestCaseResult(testCase.ToString(), jobCountResult)
+        : new TestCaseResult(testCase.ToString(), VerifyDependecyOrder(orderedJobs, jobs));
     }
 
     public string VerifyJobCount(string orderedJobs, IEnumerable<Job> jobs)
@@ -62,8 +63,7 @@ namespace OrderedJobs.Domain
 
     public TestCase[] GetTestCasePermutations(TestCase testCase)
     {
-      var jobs = CreateJobs(testCase.Jobs).ToArray();
-      return GetPermutations(jobs)
+      return GetPermutations(testCase.Jobs)
         .Select(permutation => new TestCase(string.Join("|", permutation)))
         .ToArray();
     }
@@ -78,7 +78,7 @@ namespace OrderedJobs.Domain
 
     public TestCasePermutationsResult VerifyAllPermutations(string url, TestCase testCase)
     {
-      var testCasePermutationsResult = new TestCasePermutationsResult(testCase);
+      var testCasePermutationsResult = new TestCasePermutationsResult(testCase.ToString());
       var testCasePermutations = GetTestCasePermutations(testCase);
       testCasePermutationsResult.Results = testCasePermutations
         .Select(async permutation => await Verify(url, permutation))
