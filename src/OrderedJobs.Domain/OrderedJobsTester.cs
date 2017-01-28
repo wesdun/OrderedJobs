@@ -9,9 +9,9 @@ namespace OrderedJobs.Domain
   {
     private readonly OrderedJobsCaller _orderedJobsCaller;
 
-    public OrderedJobsTester(OrderedJobsCaller _orderedJobsCaller)
+    public OrderedJobsTester(OrderedJobsCaller orderedJobsCaller)
     {
-      this._orderedJobsCaller = _orderedJobsCaller;
+      _orderedJobsCaller = orderedJobsCaller;
     }
 
     public async Task<TestCaseResult> Verify(string url, TestCase testCase)
