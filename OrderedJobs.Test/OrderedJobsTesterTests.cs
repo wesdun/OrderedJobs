@@ -26,63 +26,65 @@ namespace OrderedJobs.Test
     [Test]
     public async Task VerifyNoDependenciesTest()
     {
-      var testCase = "a-|b-|c-";
+      var jobsData = "a-|b-|c-";
       InitOrderJobTester(new[]
       {
-        new OrderedJobsResult(testCase, "abc")
+        new OrderedJobsResult(jobsData, "abc")
       });
 
-      var expectedTestCaseResult = new TestCaseResult(testCase, "PASS");
-      var testCaseResult = await _orderedJobsTester.Verify("", new TestCase(testCase));
-      Assert.That(testCaseResult, Is.EqualTo(expectedTestCaseResult));
+      var testCaseResult = await _orderedJobsTester.Verify("", new TestCase(jobsData));
+      Assert.That(testCaseResult.Result, Is.EqualTo("PASS"));
     }
 
     [Test]
     public async Task VerifyAllJobsGetOrderedTest()
     {
+      var jobsData = "a-|b-|c-";
       InitOrderJobTester(new[]
       {
-        new OrderedJobsResult("a-|b-|c-", "ab")
+        new OrderedJobsResult(jobsData, "ab")
       });
 
-      var expectedTestCaseResult = new TestCaseResult("a-|b-|c-", "FAIL: jobs must be added once");
-      var testCaseResult = await _orderedJobsTester.Verify("", new TestCase("a-|b-|c-"));
-      Assert.That(testCaseResult, Is.EqualTo(expectedTestCaseResult));
+      var testCaseResult = await _orderedJobsTester.Verify("", new TestCase(jobsData));
+      Assert.That(testCaseResult.Result, Is.EqualTo("FAIL: jobs must be added once"));
     }
 
     [Test]
     public async Task VerifyNoJobsAreRepeatedTest()
     {
+      var jobsData = "a-|b-|c-";
       InitOrderJobTester(new[]
       {
-        new OrderedJobsResult("a-|b-|c-", "abbc")
+        new OrderedJobsResult(jobsData, "abbc")
       });
 
-      var testCaseResult = await _orderedJobsTester.Verify("", new TestCase("a-|b-|c-"));
+      var testCaseResult = await _orderedJobsTester.Verify("", new TestCase(jobsData));
       Assert.That(testCaseResult.Result, Is.EqualTo("FAIL: jobs must be added once"));
     }
 
     [Test]
     public async Task VerifyDependenciesPassTest()
     {
+      var jobsData = "a-b|b-|c-a";
       InitOrderJobTester(new[]
       {
-        new OrderedJobsResult("a-b|b-|c-a", "bac")
+        new OrderedJobsResult(jobsData, "bac")
       });
 
-      var testCaseResult = await _orderedJobsTester.Verify("", new TestCase("a-b|b-|c-a"));
+      var testCaseResult = await _orderedJobsTester.Verify("", new TestCase(jobsData));
       Assert.That(testCaseResult.Result, Is.EqualTo("PASS"));
     }
 
     [Test]
     public async Task VerifyDependenciesFailTest()
     {
+      var jobsData = "a-b|b-|c-a";
       InitOrderJobTester(new[]
       {
-        new OrderedJobsResult("a-b|b-|c-a", "bca")
+        new OrderedJobsResult(jobsData, "bca")
       });
 
-      var testCaseResult = await _orderedJobsTester.Verify("", new TestCase("a-b|b-|c-a"));
+      var testCaseResult = await _orderedJobsTester.Verify("", new TestCase(jobsData));
       Assert.That(testCaseResult.Result, Is.EqualTo("FAIL: expected a before c"));
     }
 
@@ -107,48 +109,52 @@ namespace OrderedJobs.Test
     [Test]
     public async Task VerifySelfReferencingErrorPass()
     {
+      var jobsData = "a-b|b-b|c-a";
       InitOrderJobTester(new[]
       {
-        new OrderedJobsResult("a-b|b-b|c-a", "ERROR: Jobs can't depend on themselves")
+        new OrderedJobsResult(jobsData, "ERROR: Jobs can't depend on themselves")
       });
 
-      var testCaseResult = await _orderedJobsTester.Verify("", new TestCase("a-b|b-b|c-a"));
+      var testCaseResult = await _orderedJobsTester.Verify("", new TestCase(jobsData));
       Assert.That(testCaseResult.Result, Is.EqualTo("PASS"));
     }
 
     [Test]
     public async Task VerifySelfReferencingErrorFail()
     {
+      var jobsData = "a-b|b-b|c-a";
       InitOrderJobTester(new[]
       {
-        new OrderedJobsResult("a-b|b-b|c-a", "bac")
+        new OrderedJobsResult(jobsData, "bac")
       });
 
-      var testCaseResult = await _orderedJobsTester.Verify("", new TestCase("a-b|b-b|c-a"));
+      var testCaseResult = await _orderedJobsTester.Verify("", new TestCase(jobsData));
       Assert.That(testCaseResult.Result, Is.EqualTo("FAIL: expected ERROR: Jobs can't depend on themselves"));
     }
 
     [Test]
     public async Task VerifyCircularDependencyErrorPass()
     {
+      var jobsData = "a-|b-c|c-f|d-a|e-|f-b";
       InitOrderJobTester(new[]
       {
-        new OrderedJobsResult("a-|b-c|c-f|d-a|e-|f-b", "ERROR: Jobs can't have circular dependency")
+        new OrderedJobsResult(jobsData, "ERROR: Jobs can't have circular dependency")
       });
 
-      var testCaseResult = await _orderedJobsTester.Verify("", new TestCase("a-|b-c|c-f|d-a|e-|f-b"));
+      var testCaseResult = await _orderedJobsTester.Verify("", new TestCase(jobsData));
       Assert.That(testCaseResult.Result, Is.EqualTo("PASS"));
     }
 
     [Test]
     public async Task VerifyCircularDependencyErrorFail()
     {
+      var jobsData = "a-|b-c|c-f|d-a|e-|f-b";
       InitOrderJobTester(new[]
       {
-        new OrderedJobsResult("a-|b-c|c-f|d-a|e-|f-b", "acbdef")
+        new OrderedJobsResult(jobsData, "acbdef")
       });
 
-      var testCaseResult = await _orderedJobsTester.Verify("", new TestCase("a-|b-c|c-f|d-a|e-|f-b"));
+      var testCaseResult = await _orderedJobsTester.Verify("", new TestCase(jobsData));
       Assert.That(testCaseResult.Result, Is.EqualTo("FAIL: expected ERROR: Jobs can't have circular dependency"));
     }
 
@@ -161,8 +167,39 @@ namespace OrderedJobs.Test
         new OrderedJobsResult("b-|a-", "ab")
       });
 
+      var expectedTestCasePermutationsResult = new TestCasePermutationsResult("a-|b-")
+      {
+        Result = "PASS",
+        Results = new[]
+        {
+          new TestCaseResult("a-|b-", "PASS"),
+          new TestCaseResult("b-|a-", "PASS")
+        }
+      };
       var testCasePermutationsResult = _orderedJobsTester.VerifyAllPermutations("", new TestCase("a-|b-"));
-      Assert.That(testCasePermutationsResult.Result, Is.EqualTo("PASS"));
+      Assert.That(testCasePermutationsResult, Is.EqualTo(expectedTestCasePermutationsResult));
+    }
+
+    [Test]
+    public void VerifyAllPermutationsFailWhenOneTestCaseFailsTest()
+    {
+      InitOrderJobTester(new[]
+      {
+        new OrderedJobsResult("a-|b-", "ab"),
+        new OrderedJobsResult("b-|a-", "b")
+      });
+
+      var expectedTestCasePermutationsResult = new TestCasePermutationsResult("a-|b-")
+      {
+        Result = "FAIL",
+        Results = new[]
+        {
+          new TestCaseResult("a-|b-", "PASS"),
+          new TestCaseResult("b-|a-", "FAIL: jobs must be added once")
+        }
+      };
+      var testCasePermutationsResult = _orderedJobsTester.VerifyAllPermutations("", new TestCase("a-|b-"));
+      Assert.That(testCasePermutationsResult, Is.EqualTo(expectedTestCasePermutationsResult));
     }
 
     [Test]
@@ -195,6 +232,45 @@ namespace OrderedJobs.Test
             {
               new TestCaseResult("a-|b-", "PASS"),
               new TestCaseResult("b-|a-", "PASS")
+            }
+          }
+        }
+      };
+
+      var testResult = _orderedJobsTester.VerifyAllTestCases("", new[] {new TestCase("a-"), new TestCase("a-|b-")});
+      Assert.That(testResult, Is.EqualTo(expectedTestResult));
+    }
+
+    [Test]
+    public void VerifyAllTestCasesFailWhenOneTestCaseFails()
+    {
+      InitOrderJobTester(new[]
+      {
+        new OrderedJobsResult("a-", "a"),
+        new OrderedJobsResult("a-|b-", "ab"),
+        new OrderedJobsResult("b-|a-", "b")
+      });
+
+      var expectedTestResult = new TestResult
+      {
+        Result = "FAIL",
+        Results = new[]
+        {
+          new TestCasePermutationsResult("a-")
+          {
+            Result = "PASS",
+            Results = new[]
+            {
+              new TestCaseResult("a-", "PASS")
+            }
+          },
+          new TestCasePermutationsResult("a-|b-")
+          {
+            Result = "FAIL",
+            Results = new[]
+            {
+              new TestCaseResult("a-|b-", "PASS"),
+              new TestCaseResult("b-|a-", "FAIL: jobs must be added once")
             }
           }
         }
