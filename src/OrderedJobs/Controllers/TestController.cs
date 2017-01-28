@@ -27,21 +27,16 @@ namespace OrderedJobs.Controllers
     }
 
     [HttpPost]
-    public void Post([FromBody] string testCase)
+    public void Post([FromBody] string jobs)
     {
-      _dbGateway.Add(new TestCase(testCase));
+      _dbGateway.Add(new TestCase(jobs));
     }
 
     [HttpDelete]
-    public void Delete()
+    public void Delete([FromBody] string jobs)
     {
-      _dbGateway.DeleteAll();
-    }
-
-    [HttpDelete("{jobs}")]
-    public void Delete(string jobs)
-    {
-      _dbGateway.Delete(new TestCase(jobs));
+      if (jobs != null) _dbGateway.Delete(new TestCase(jobs));
+      else _dbGateway.DeleteAll();
     }
   }
 }
